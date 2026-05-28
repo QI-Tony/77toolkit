@@ -7,8 +7,262 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>" />
     <script type="module" crossorigin src="/assets/index-CEh3cJfJ.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-Com5bbEZ.css">
+    <style>
+      #lang-switcher {
+        position: fixed;
+        top: 12px;
+        right: 16px;
+        z-index: 9999;
+        display: flex;
+        gap: 2px;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 8px;
+        padding: 4px;
+        backdrop-filter: blur(6px);
+      }
+      .lang-btn {
+        padding: 4px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        background: transparent;
+        color: #fff;
+        opacity: 0.55;
+        transition: background 0.2s, opacity 0.2s;
+        letter-spacing: 0.03em;
+      }
+      .lang-btn:hover { opacity: 0.9; }
+      .lang-btn.active {
+        background: rgba(255, 255, 255, 0.22);
+        opacity: 1;
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app"></div>
+
+    <div id="lang-switcher">
+      <button class="lang-btn active" id="btn-zh" onclick="setLang('zh')">中文</button>
+      <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+
+    <script>
+    (function () {
+      /* ── Translation dictionary: Chinese → English ── */
+      var DICT = {
+        "色彩谱系分析仪": "Color Spectrum Analyzer",
+        "点击或拖拽图片到此处": "Click or drag image here",
+        "松开鼠标以上传": "Release to upload",
+        "拖拽图片到此处，或点击上传": "Drag image here, or click to upload",
+        "支持 JPG · PNG · WEBP  |  最大 20 MB": "Supports JPG · PNG · WEBP  |  Max 20 MB",
+        "选择图片": "Choose Image",
+        "颜色谱系": "Color Spectrum",
+        "个色系": "color families",
+        "颜色家族环形图": "Color Family Ring Chart",
+        "红色系": "Reds",
+        "橙色系": "Oranges",
+        "黄色系": "Yellows",
+        "绿色系": "Greens",
+        "青色系": "Cyans",
+        "蓝色系": "Blues",
+        "紫色系": "Purples",
+        "粉色系": "Pinks",
+        "棕色系": "Browns",
+        "灰色系": "Grays",
+        "黑色系": "Blacks",
+        "白色系": "Whites",
+        "明度极低，深沉近黑": "Very low lightness, deep near black",
+        "明度极高，纯净近白": "Very high lightness, pure near white",
+        "完全中性灰": "Fully neutral gray",
+        "略带彩色的灰调": "Slightly colorful gray tone",
+        "中间调": "Midtone",
+        "饱和度低，色彩柔和": "Low saturation, soft colors",
+        "饱和度高，色彩鲜艳": "High saturation, vivid colors",
+        "整体色调偏暖": "Overall warm tone",
+        "整体色调偏冷": "Overall cool tone",
+        "明度较高，色彩明亮": "Higher lightness, bright colors",
+        "明度较低，色彩深沉": "Lower lightness, deep colors",
+        "热烈而醒目": "Intense and striking",
+        "活力而温暖": "Vibrant and warm",
+        "明亮而活泼": "Bright and lively",
+        "清新而自然": "Fresh and natural",
+        "清透而宁静": "Clear and serene",
+        "沉稳而深邃": "Calm and profound",
+        "神秘而优雅": "Mysterious and elegant",
+        "柔和而浪漫": "Soft and romantic",
+        "朴实而稳重": "Simple and steady",
+        "低调而细腻": "Subtle and delicate",
+        "深沉而有力": "Deep and powerful",
+        "纯净而明亮": "Pure and bright",
+        "独特": "Unique",
+        "无法从图片中提取像素，请确认图片格式正确且不全透明。": "Cannot extract pixels. Please confirm the image format is correct and not fully transparent.",
+        "分析失败：": "Analysis failed: ",
+        "未知错误": "Unknown error",
+        "单点取色": "Single Pick",
+        "框选取色": "Box Select",
+        "✕ 清除结果": "✕ Clear",
+        "取色图片": "Color Picker Image",
+        "💡 点击图片任意位置，即可提取该像素颜色及组成": "💡 Click anywhere on the image to extract the pixel color and composition",
+        "💡 在图片上按住并拖拽，松开后分析所选区域的颜色谱系": "💡 Hold and drag on the image, release to analyze colors in the selected area",
+        "正在分析选区颜色…": "Analyzing selection colors…",
+        "选区颜色分析": "Region Color Analysis",
+        "种主色": "dominant colors",
+        "选区颜色谱系图": "Region Color Spectrum",
+        "颜色分析报告.json": "color-analysis-report.json",
+        "颜色调色板.png": "color-palette.png",
+        "🎨 颜色调色板": "🎨 Color Palette",
+        "图片加载失败，请检查文件是否损坏。": "Image load failed. Please check if the file is corrupted.",
+        "颜色提取失败，请重试。": "Color extraction failed, please try again.",
+        "JSON 报告已下载": "JSON report downloaded",
+        "颜色卡片 PNG 已下载": "Color palette PNG downloaded",
+        "上传图片，即时提取主色、分析颜色家族": "Upload an image to instantly extract dominant colors and analyze color families",
+        "↩ 重新上传": "↩ Re-upload",
+        "取色工具": "Color Picker",
+        "单点取色 · 框选分析": "Single Pick · Box Analysis",
+        "正在加载图片…": "Loading image…",
+        "正在分析图片颜色，请稍候…": "Analyzing image colors, please wait…",
+        "使用 K-Means++ 算法提取主色": "Extracting dominant colors using K-Means++ algorithm",
+        "占比排序 ↓": "Sort by % ↓",
+        "提取顺序": "Extraction Order",
+        "筛选：": "Filter:",
+        "⬇ 下载 JSON": "⬇ Download JSON",
+        "⬇ 下载调色板 PNG": "⬇ Download Palette PNG",
+        "主色板": "Color Palette",
+        "已复制：": "Copied: ",
+        "颜色谱系图": "Color Spectrum Chart",
+        "点击色系可过滤上方主色板 · 再次点击取消过滤": "Click a color family to filter · Click again to clear filter",
+        "家族详细分析": "Family Detail Analysis",
+        "色彩谱系分析仪 · 所有处理在本地浏览器完成，不上传任何数据": "Color Spectrum Analyzer · All processing is done locally in your browser, no data is uploaded",
+        "⚠️": "⚠️",
+        "鲜艳": "Vivid",
+        "偏暖": "Warm",
+        "偏冷": "Cool",
+        "明亮": "Bright",
+        "深沉": "Deep"
+      };
+
+      /* Build reverse dict: English → Chinese */
+      var DICT_REV = {};
+      for (var k in DICT) DICT_REV[DICT[k]] = k;
+
+      var nodeCache = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+      var currentLang = 'zh';
+      var mutObs = null;
+      var busy = false;
+
+      function leadTrail(s) {
+        return { lead: s.match(/^(\s*)/)[1], trail: s.match(/(\s*)$/)[1] };
+      }
+
+      function translateTextNode(node, toEn) {
+        var text = node.textContent;
+        var trimmed = text.trim();
+        if (!trimmed) return;
+        var dict = toEn ? DICT : DICT_REV;
+        var translated = dict[trimmed];
+        if (translated !== undefined) {
+          var lt = leadTrail(text);
+          if (nodeCache) {
+            if (toEn) nodeCache.set(node, text);
+            else nodeCache.delete(node);
+          }
+          node.textContent = lt.lead + translated + lt.trail;
+          return;
+        }
+        /* On revert to ZH, restore from cache if reverse lookup failed */
+        if (!toEn && nodeCache) {
+          var cached = nodeCache.get(node);
+          if (cached !== undefined) {
+            node.textContent = cached;
+            nodeCache.delete(node);
+          }
+        }
+      }
+
+      function translateAttr(el, attr, toEn) {
+        var val = el.getAttribute(attr);
+        if (!val) return;
+        /* Exact-match translation */
+        var trimmed = val.trim();
+        var dict = toEn ? DICT : DICT_REV;
+        if (dict[trimmed]) {
+          el.setAttribute(attr, dict[trimmed]);
+          return;
+        }
+        /* Dynamic title: "占图片 X.X%" <-> "Image share: X.X%" */
+        if (toEn) {
+          var m = val.match(/^占图片\s+([\d.]+)%$/);
+          if (m) { el.setAttribute(attr, 'Image share: ' + m[1] + '%'); return; }
+        } else {
+          var m2 = val.match(/^Image share:\s+([\d.]+)%$/);
+          if (m2) { el.setAttribute(attr, '占图片 ' + m2[1] + '%'); return; }
+        }
+      }
+
+      function walkAndTranslate(root, toEn) {
+        var walker = document.createTreeWalker(root, 0x5 /* SHOW_TEXT | SHOW_ELEMENT */);
+        var node;
+        while ((node = walker.nextNode())) {
+          if (node.nodeType === 3) {
+            translateTextNode(node, toEn);
+          } else if (node.nodeType === 1) {
+            if (node.hasAttribute('title')) translateAttr(node, 'title', toEn);
+            if (node.hasAttribute('placeholder')) translateAttr(node, 'placeholder', toEn);
+          }
+        }
+      }
+
+      function startObserver() {
+        if (mutObs) return;
+        mutObs = new MutationObserver(function (mutations) {
+          if (currentLang !== 'en' || busy) return;
+          busy = true;
+          for (var i = 0; i < mutations.length; i++) {
+            var m = mutations[i];
+            if (m.type === 'characterData') {
+              /* Clear stale cache so we translate the fresh ZH value */
+              if (nodeCache) nodeCache.delete(m.target);
+              translateTextNode(m.target, true);
+            } else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) {
+                var n = m.addedNodes[j];
+                if (n.nodeType === 3) translateTextNode(n, true);
+                else if (n.nodeType === 1) walkAndTranslate(n, true);
+              }
+            } else if (m.type === 'attributes') {
+              if (m.target.nodeType === 1) translateAttr(m.target, m.attributeName, true);
+            }
+          }
+          busy = false;
+        });
+        mutObs.observe(document.body, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+          attributes: true,
+          attributeFilter: ['title', 'placeholder']
+        });
+      }
+
+      function stopObserver() {
+        if (mutObs) { mutObs.disconnect(); mutObs = null; }
+      }
+
+      window.setLang = function (lang) {
+        if (lang === currentLang) return;
+        stopObserver();
+        var toEn = lang === 'en';
+        walkAndTranslate(document.body, toEn);
+        currentLang = lang;
+        document.documentElement.lang = toEn ? 'en' : 'zh-CN';
+        document.title = toEn ? 'Color Spectrum Analyzer' : '色彩谱系分析仪';
+        document.getElementById('btn-zh').classList.toggle('active', !toEn);
+        document.getElementById('btn-en').classList.toggle('active', toEn);
+        if (toEn) startObserver();
+      };
+    })();
+    </script>
   </body>
 </html>
