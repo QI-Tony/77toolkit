@@ -6,12 +6,14 @@
  */
 import { ref } from 'vue'
 import { isLightColor } from '../utils/colorConverter.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const props = defineProps({
   color: { type: Object, required: true }
 })
 
 const emit = defineEmits(['copy'])
+const { locale } = useLocale()
 
 const copiedKey = ref('')  // 哪个字段刚复制过
 
@@ -54,7 +56,7 @@ async function copyValue(text, key) {
       <span class="pct-badge">{{ color.percentage }}%</span>
       <!-- 家族标签 -->
       <span class="family-badge" :class="'family-' + color.familyKey">
-        {{ color.familyName }}
+        {{ locale === 'en' ? color.familyNameEn : color.familyName }}
       </span>
     </div>
 
@@ -91,7 +93,7 @@ async function copyValue(text, key) {
     </div>
 
     <!-- 描述 -->
-    <p class="desc">{{ color.description }}</p>
+    <p class="desc">{{ locale === 'en' ? color.descriptionEn : color.description }}</p>
   </article>
 </template>
 

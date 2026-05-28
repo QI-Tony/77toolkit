@@ -10,6 +10,9 @@ import FamilyChart from './components/FamilyChart.vue'
 import ColorPickerPanel from './components/ColorPickerPanel.vue'
 import { extractColors } from './utils/colorExtractor.js'
 import { downloadJSON, downloadPalettePNG } from './utils/exportUtils.js'
+import { useLocale } from './composables/useLocale.js'
+
+const { locale, t, familyName, toggleLocale } = useLocale()
 
 // ─── 状态 ─────────────────────────────────────────────────────
 
@@ -66,7 +69,7 @@ async function handleUpload(file, err) {
     img.src = imageUrl.value
     await new Promise((resolve, reject) => {
       img.onload = resolve
-      img.onerror = () => reject(new Error('图片加载失败，请检查文件是否损坏。'))
+      img.onerror = () => reject(new Error(t('imgLoadFail')))
     })
 
     loadedImg.value = img  // 供取色工具使用
@@ -74,7 +77,7 @@ async function handleUpload(file, err) {
     colors.value = result.colors
     families.value = result.families
   } catch (e) {
-    errorMsg.value = e.message || '颜色提取失败，请重试。'
+    errorMsg.value = e.message || t('extractFail')
   } finally {
     isAnalyzing.value = false
   }
@@ -109,13 +112,13 @@ function showNotification(msg) {
 
 function handleDownloadJSON() {
   downloadJSON(colors.value, families.value)
-  showNotification('JSON 报告已下载')
+  showNotification(t('downloadedJSON'))
 }
 
 function handleDownloadPNG() {
   const sorted = [...colors.value].sort((a, b) => b.percentage - a.percentage)
   downloadPalettePNG(sorted)
-  showNotification('颜色卡片 PNG 已下载')
+  showNotification(t('downloadedPNG'))
 }
 </script>
 
@@ -127,18 +130,23 @@ function handleDownloadPNG() {
         <div class="logo">
           <span class="logo-icon">🎨</span>
           <div>
-            <h1 class="app-title">色彩谱系分析仪</h1>
-            <p class="app-sub">上传图片，即时提取主色、分析颜色家族</p>
+            <h1 class="app-title">{{ t('title') }}</h1>
+            <p class="app-sub">{{ t('subtitle') }}</p>
           </div>
         </div>
 
-        <button
-          v-if="imageUrl"
-          class="btn-ghost reupload-btn"
-          @click="resetApp"
-        >
-          ↩ 重新上传
-        </button>
+        <div class="header-actions">
+          <button class="btn-lang" @click="toggleLocale" :title="locale === 'en' ? 'Switch to Chinese' : '切换为英文'">
+            {{ locale === 'en' ? '中文' : 'EN' }}
+          </button>
+          <button
+            v-if="imageUrl"
+            class="btn-ghost reupload-btn"
+            @click="resetApp"
+          >
+            {{ t('reupload') }}
+          </button>
+        </div>
       </div>
     </header>
 
@@ -162,8 +170,8 @@ function handleDownloadPNG() {
         <!-- ── 取色工具 + 图片预览 ── -->
         <section class="section">
           <h2 class="section-title">
-            取色工具
-            <span class="section-subtitle">单点取色 · 框选分析</span>
+            {{ t('colorPicker') }}
+            <span class="section-subtitle">{{ t('colorPickerSub') }}</span>
           </h2>
           <ColorPickerPanel
             v-if="loadedImg"
@@ -172,7 +180,7 @@ function handleDownloadPNG() {
           <!-- 图片已上传但尚未加载完成时的占位 -->
           <div v-else-if="imageUrl" class="img-loading-placeholder">
             <div class="spinner"></div>
-            <p>正在加载图片…</p>
+            <p>{{ t('loadingImg') }}</p>
           </div>
         </section>
 
@@ -181,8 +189,8 @@ function handleDownloadPNG() {
           <section v-if="isAnalyzing" class="section loading-section">
             <div class="loading-card">
               <div class="spinner"></div>
-              <p class="loading-text">正在分析图片颜色，请稍候…</p>
-              <p class="loading-hint">使用 K-Means++ 算法提取主色</p>
+              <p class="loading-text">{{ t('analyzing') }}</p>
+              <p class="loading-hint">{{ t('analyzeHint') }}</p>
             </div>
           </section>
         </transition>
@@ -198,14 +206,14 @@ function handleDownloadPNG() {
                 :class="{ active: sortDesc }"
                 @click="sortDesc = true"
               >
-                占比排序 ↓
+                {{ t('sortByPct') }}
               </button>
               <button
                 class="btn-chip"
                 :class="{ active: !sortDesc }"
                 @click="sortDesc = false"
               >
-                提取顺序
+                {{ t('sortByOrder') }}
               </button>
 
               <button
@@ -213,16 +221,16 @@ function handleDownloadPNG() {
                 class="btn-chip filter-chip"
                 @click="selectedFamilyKey = null"
               >
-                筛选：{{ selectedFamilyObj?.name }} ✕
+                {{ t('filterPrefix') }} {{ familyName(selectedFamilyKey) }} ✕
               </button>
             </div>
 
             <div class="action-right">
               <button class="btn-outline" @click="handleDownloadJSON">
-                ⬇ 下载 JSON
+                {{ t('downloadJSON') }}
               </button>
               <button class="btn-outline" @click="handleDownloadPNG">
-                ⬇ 下载调色板 PNG
+                {{ t('downloadPNG') }}
               </button>
             </div>
           </div>
@@ -230,8 +238,8 @@ function handleDownloadPNG() {
           <!-- ── 主色卡片区 ── -->
           <section class="section">
             <h2 class="section-title">
-              主色板
-              <span class="section-count">{{ displayColors.length }} 色</span>
+              {{ t('palette') }}
+              <span class="section-count">{{ displayColors.length }}&nbsp;{{ locale === 'en' ? 'colors' : '色' }}</span>
             </h2>
 
             <div class="color-grid">
@@ -239,18 +247,18 @@ function handleDownloadPNG() {
                 v-for="c in displayColors"
                 :key="c.id"
                 :color="c"
-                @copy="showNotification('已复制：' + $event)"
+                @copy="showNotification(t('copiedPrefix') + $event)"
               />
             </div>
 
             <p v-if="displayColors.length === 0" class="empty-hint">
-              当前色系下无颜色，点击上方"筛选"按钮取消过滤
+              {{ t('noColors') }}
             </p>
           </section>
 
           <!-- ── 颜色谱系图 ── -->
           <section class="section">
-            <h2 class="section-title">颜色谱系图</h2>
+            <h2 class="section-title">{{ t('familyChart') }}</h2>
             <div class="chart-card">
               <FamilyChart
                 :families="families"
@@ -258,12 +266,12 @@ function handleDownloadPNG() {
                 @select="handleFamilySelect"
               />
             </div>
-            <p class="chart-hint">点击色系可过滤上方主色板 · 再次点击取消过滤</p>
+            <p class="chart-hint">{{ t('chartHint') }}</p>
           </section>
 
           <!-- ── 详细分析区 ── -->
           <section class="section">
-            <h2 class="section-title">家族详细分析</h2>
+            <h2 class="section-title">{{ t('familyAnalysis') }}</h2>
             <div class="analysis-grid">
               <div
                 v-for="fam in families"
@@ -280,7 +288,7 @@ function handleDownloadPNG() {
 
                 <div class="analysis-body">
                   <div class="analysis-header">
-                    <span class="analysis-name">{{ fam.name }}</span>
+                    <span class="analysis-name">{{ familyName(fam.key) }}</span>
                     <span class="analysis-pct">{{ fam.totalPercentage }}%</span>
                   </div>
 
@@ -295,7 +303,7 @@ function handleDownloadPNG() {
                     ></span>
                   </div>
 
-                  <p class="analysis-desc">{{ fam.familyDescription }}</p>
+                  <p class="analysis-desc">{{ locale === 'en' ? fam.familyDescriptionEn : fam.familyDescription }}</p>
 
                   <!-- 颜色明细（展开后） -->
                   <transition name="expand">
@@ -308,7 +316,7 @@ function handleDownloadPNG() {
                         <span class="cd-swatch" :style="{ background: c.hex }"></span>
                         <span class="cd-hex mono">{{ c.hex.toUpperCase() }}</span>
                         <span class="cd-pct">{{ c.percentage }}%</span>
-                        <span class="cd-desc">{{ c.description }}</span>
+                        <span class="cd-desc">{{ locale === 'en' ? c.descriptionEn : c.description }}</span>
                       </div>
                     </div>
                   </transition>
@@ -323,7 +331,7 @@ function handleDownloadPNG() {
 
     <!-- ═══ 页脚 ═══ -->
     <footer class="app-footer">
-      <p>色彩谱系分析仪 · 所有处理在本地浏览器完成，不上传任何数据</p>
+      <p>{{ t('footer') }}</p>
     </footer>
 
     <!-- ═══ Toast 通知 ═══ -->
@@ -399,6 +407,28 @@ function handleDownloadPNG() {
 .reupload-btn:hover {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.6);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-lang {
+  color: rgba(255,255,255,0.88);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: background 0.18s, border-color 0.18s;
+  background: rgba(255,255,255,0.10);
+}
+.btn-lang:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.7);
 }
 
 /* ─── 主内容 ─────────────────────────────────────────────────── */

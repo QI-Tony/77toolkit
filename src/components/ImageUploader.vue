@@ -4,8 +4,10 @@
  * 支持拖拽、点击上传，校验类型与大小
  */
 import { ref } from 'vue'
+import { useLocale } from '../composables/useLocale.js'
 
 const emit = defineEmits(['upload'])
+const { locale, t } = useLocale()
 
 const isDragging = ref(false)
 const fileInputRef = ref(null)
@@ -32,11 +34,15 @@ function onDrop(e) {
 
 function processFile(file) {
   if (!ACCEPTED_TYPES.includes(file.type)) {
-    emit('upload', null, `不支持的格式「${file.type || '未知'}」，请上传 JPG、PNG 或 WEBP 图片。`)
+    emit('upload', null, locale.value === 'en'
+      ? `Unsupported format "${file.type || 'unknown'}", please upload JPG, PNG or WEBP.`
+      : `不支持的格式「${file.type || '未知'}」，请上传 JPG、PNG 或 WEBP 图片。`)
     return
   }
   if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-    emit('upload', null, `图片过大（${(file.size / 1024 / 1024).toFixed(1)} MB），请上传小于 ${MAX_SIZE_MB} MB 的图片。`)
+    emit('upload', null, locale.value === 'en'
+      ? `Image too large (${(file.size / 1024 / 1024).toFixed(1)} MB), please upload an image under ${MAX_SIZE_MB} MB.`
+      : `图片过大（${(file.size / 1024 / 1024).toFixed(1)} MB），请上传小于 ${MAX_SIZE_MB} MB 的图片。`)
     return
   }
   emit('upload', file, null)
@@ -71,11 +77,11 @@ function processFile(file) {
         </svg>
       </div>
 
-      <p class="drop-title">{{ isDragging ? '松开鼠标以上传' : '拖拽图片到此处，或点击上传' }}</p>
-      <p class="drop-hint">支持 JPG · PNG · WEBP &nbsp;|&nbsp; 最大 20 MB</p>
+      <p class="drop-title">{{ isDragging ? t('dragRelease') : t('dragDrop') }}</p>
+      <p class="drop-hint">{{ t('uploadHint') }}</p>
 
       <button class="pick-btn" type="button" tabindex="-1" @click.stop="openFilePicker">
-        选择图片
+        {{ t('chooseImage') }}
       </button>
     </div>
 

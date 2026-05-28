@@ -147,6 +147,7 @@ export function groupColorsByFamily(colors) {
       fam.totalPercentage = parseFloat(fam.totalPercentage.toFixed(1))
       fam.representativeColor = fam.colors[0]
       fam.familyDescription = buildFamilyDescription(fam)
+      fam.familyDescriptionEn = buildFamilyDescriptionEn(fam)
       return fam
     })
     .sort((a, b) => b.totalPercentage - a.totalPercentage)
@@ -167,8 +168,82 @@ const FAMILY_ADJECTIVE = {
   white:  '纯净而明亮'
 }
 
+const FAMILY_ADJECTIVE_EN = {
+  red:    'vibrant and eye-catching',
+  orange: 'energetic and warm',
+  yellow: 'bright and lively',
+  green:  'fresh and natural',
+  cyan:   'clear and serene',
+  blue:   'calm and deep',
+  purple: 'mysterious and elegant',
+  pink:   'soft and romantic',
+  brown:  'earthy and grounded',
+  gray:   'subtle and refined',
+  black:  'deep and powerful',
+  white:  'pure and bright'
+}
+
+const FAMILY_NAMES_EN = {
+  red: 'Reds', orange: 'Oranges', yellow: 'Yellows', green: 'Greens',
+  cyan: 'Cyans', blue: 'Blues', purple: 'Purples', pink: 'Pinks',
+  brown: 'Browns', gray: 'Grays', black: 'Blacks', white: 'Whites'
+}
+
+export function getColorFamilyNameEn(key) {
+  return FAMILY_NAMES_EN[key] ?? key
+}
+
 function buildFamilyDescription({ key, name, colors, totalPercentage }) {
   const count = colors.length
   const adjective = FAMILY_ADJECTIVE[key] ?? '独特'
   return `${name}占图片约 ${totalPercentage.toFixed(1)}%，含 ${count} 个色块，整体${adjective}。`
+}
+
+function buildFamilyDescriptionEn({ key, colors, totalPercentage }) {
+  const count = colors.length
+  const adjective = FAMILY_ADJECTIVE_EN[key] ?? 'distinctive'
+  const eName = getColorFamilyNameEn(key)
+  return `${eName} covers ~${totalPercentage.toFixed(1)}% of the image with ${count} color swatch${count !== 1 ? 'es' : ''}, ${adjective}.`
+}
+
+export function generateColorDescriptionEn(r, g, b) {
+  const [h, s, l] = rgbToHsl(r, g, b)
+  const key = getColorFamilyKey(r, g, b)
+  const fName = getColorFamilyNameEn(key)
+
+  if (key === 'black') return `Belongs to ${fName} — very dark, close to black.`
+  if (key === 'white') return `Belongs to ${fName} — very light, close to white.`
+  if (key === 'gray') {
+    const satText = s < 5 ? 'purely neutral gray' : 'slightly tinted gray'
+    const ligText = l < 35 ? 'dark' : l > 65 ? 'light' : 'mid'
+    return `Belongs to ${fName}: ${satText} (${ligText} gray).`
+  }
+
+  const total = r + g + b || 1
+  const rPct = Math.round((r / total) * 100)
+  const gPct = Math.round((g / total) * 100)
+  const bPct = Math.round((b / total) * 100)
+
+  const sorted = [
+    { name: 'red', v: r, pct: rPct },
+    { name: 'green', v: g, pct: gPct },
+    { name: 'blue', v: b, pct: bPct }
+  ].sort((a, c) => c.v - a.v)
+
+  const parts = [
+    `Belongs to ${fName}`,
+    `~${sorted[0].pct}% ${sorted[0].name}, ${sorted[1].pct}% ${sorted[1].name}, ${sorted[2].pct}% ${sorted[2].name}`
+  ]
+
+  if (s < 25) parts.push('low saturation, soft tone')
+  else if (s > 80) parts.push('high saturation, vivid')
+
+  const warmth = r - b
+  if (warmth > 60) parts.push('overall warm tone')
+  else if (warmth < -60) parts.push('overall cool tone')
+
+  if (l > 75) parts.push('high lightness, bright')
+  else if (l < 28) parts.push('low lightness, deep')
+
+  return parts.join('; ') + '.'
 }

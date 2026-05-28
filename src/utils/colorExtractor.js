@@ -12,7 +12,9 @@ import {
 import {
   getColorFamilyKey,
   getColorFamilyName,
+  getColorFamilyNameEn,
   generateColorDescription,
+  generateColorDescriptionEn,
   groupColorsByFamily
 } from './colorFamily.js'
 
@@ -230,7 +232,9 @@ export async function extractColors(img, numColors = 8) {
       percentage,
       familyKey,
       familyName: getColorFamilyName(familyKey),
-      description: generateColorDescription(r, g, b)
+      familyNameEn: getColorFamilyNameEn(familyKey),
+      description: generateColorDescription(r, g, b),
+      descriptionEn: generateColorDescriptionEn(r, g, b)
     }
   })
 

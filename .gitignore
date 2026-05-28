@@ -21,8 +21,3 @@ Thumbs.db
 .env.local
 .env.*.local
 
-src/*
-index.html
-pckage-lock.json
-package.json
-vite.config.js

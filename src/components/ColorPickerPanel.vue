@@ -17,13 +17,18 @@ import {
 import {
   getColorFamilyKey,
   getColorFamilyName,
-  generateColorDescription
+  getColorFamilyNameEn,
+  generateColorDescription,
+  generateColorDescriptionEn
 } from '../utils/colorFamily.js'
 import { extractColors } from '../utils/colorExtractor.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const props = defineProps({
   imageElement: { type: Object, required: true }  // 已加载完成的 HTMLImageElement
 })
+
+const { locale, t } = useLocale()
 
 // ── 模式 ────────────────────────────────────────────────────────
 const mode = ref('point')   // 'point' | 'area'
@@ -256,7 +261,9 @@ function onClick(e) {
     hslString:  formatHslString(h, s, l),
     familyKey,
     familyName: getColorFamilyName(familyKey),
+    familyNameEn: getColorFamilyNameEn(familyKey),
     description: generateColorDescription(r, g, b),
+    descriptionEn: generateColorDescriptionEn(r, g, b),
     isLight:    isLightColor(r, g, b)
   }
 }
@@ -289,7 +296,7 @@ async function doAreaAnalysis(sel) {
     areaColors.value   = result.colors
     areaFamilies.value = result.families
   } catch (err) {
-    areaError.value = '分析失败：' + (err.message ?? '未知错误')
+    areaError.value = (locale.value === 'en' ? 'Analysis failed: ' : '分析失败：') + (err.message ?? (locale.value === 'en' ? 'Unknown error' : '未知错误'))
   } finally {
     isAnalyzingArea.value = false
   }
@@ -373,7 +380,7 @@ onBeforeUnmount(() => {
             <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7l4 4-7.5 7.5-1 1-2-2 1-1L12 9V5.73A2 2 0 0 1 12 2z"/>
             <path d="M5 19l2-2M3 22l2-1-1-1z"/>
           </svg>
-          单点取色
+          {{ t('pointPick') }}
         </button>
 
         <button class="tool-btn" :class="{ active: mode === 'area' }" @click="setMode('area')">
@@ -381,7 +388,7 @@ onBeforeUnmount(() => {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 2"/>
           </svg>
-          框选取色
+          {{ t('areaPick') }}
         </button>
       </div>
 
@@ -389,7 +396,7 @@ onBeforeUnmount(() => {
         v-if="pointResult || areaColors.length"
         class="tool-clear"
         @click="clearAll"
-      >✕ 清除结果</button>
+      >{{ t('clearResult') }}</button>
     </div>
 
     <!-- ══ 图片 + 覆盖 Canvas ══ -->
@@ -435,14 +442,14 @@ onBeforeUnmount(() => {
 
     <!-- 提示文字 -->
     <p v-if="!pointResult && !areaColors.length && !isAnalyzingArea" class="mode-hint">
-      <template v-if="mode === 'point'">💡 点击图片任意位置，即可提取该像素颜色及组成</template>
-      <template v-else>💡 在图片上按住并拖拽，松开后分析所选区域的颜色谱系</template>
+      <template v-if="mode === 'point'">{{ t('modeHintPoint') }}</template>
+      <template v-else>{{ t('modeHintArea') }}</template>
     </p>
 
     <!-- 加载中 -->
     <div v-if="isAnalyzingArea" class="mini-loading">
       <div class="mini-spinner"></div>
-      <span>正在分析选区颜色…</span>
+      <span>{{ t('analyzingArea') }}</span>
     </div>
 
     <!-- 错误 -->
@@ -464,7 +471,7 @@ onBeforeUnmount(() => {
           <!-- 颜色信息 -->
           <div class="pc-info">
             <!-- 家族标签 -->
-            <span class="pc-family-badge">{{ pointResult.familyName }}</span>
+            <span class="pc-family-badge">{{ locale === 'en' ? pointResult.familyNameEn : pointResult.familyName }}</span>
 
             <!-- 值列 + 复制 -->
             <div
@@ -512,7 +519,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 描述文字 -->
-        <p class="pc-desc">{{ pointResult.description }}</p>
+        <p class="pc-desc">{{ locale === 'en' ? pointResult.descriptionEn : pointResult.description }}</p>
       </div>
     </transition>
 

@@ -5,6 +5,7 @@
  * 右侧：家族列表，可点击高亮/过滤
  */
 import { computed, ref } from 'vue'
+import { useLocale } from '../composables/useLocale.js'
 
 const props = defineProps({
   families: { type: Array, required: true },
@@ -12,6 +13,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['select'])
+const { locale, familyName } = useLocale()
 
 // ─── SVG 环形图计算 ───────────────────────────────────────────
 
@@ -102,9 +104,12 @@ const activeKey = computed(() => hoveredKey.value ?? props.selectedFamily)
 const centerInfo = computed(() => {
   if (activeKey.value) {
     const fam = props.families.find((f) => f.key === activeKey.value)
-    if (fam) return { name: fam.name, pct: fam.totalPercentage + '%' }
+    if (fam) return { name: familyName(fam.key), pct: fam.totalPercentage + '%' }
   }
-  return { name: '颜色谱系', pct: props.families.length + ' 个色系' }
+  return {
+    name: locale.value === 'en' ? 'Color Families' : '颜色谱系',
+    pct: props.families.length + (locale.value === 'en' ? ' families' : ' 个色系')
+  }
 })
 </script>
 
@@ -116,7 +121,7 @@ const centerInfo = computed(() => {
         :viewBox="`0 0 ${SVG} ${SVG}`"
         xmlns="http://www.w3.org/2000/svg"
         class="donut-svg"
-        aria-label="颜色家族环形图"
+        :aria-label="locale === 'en' ? 'Color family donut chart' : '颜色家族环形图'"
       >
         <!-- 扇形段 -->
         <g>
@@ -171,7 +176,7 @@ const centerInfo = computed(() => {
         <!-- 名称 + 描述 -->
         <div class="family-text">
           <div class="family-header">
-            <span class="family-name">{{ fam.name }}</span>
+            <span class="family-name">{{ familyName(fam.key) }}</span>
             <span class="family-pct">{{ fam.totalPercentage }}%</span>
           </div>
           <!-- 进度条 -->
@@ -185,7 +190,7 @@ const centerInfo = computed(() => {
             ></div>
           </div>
           <p v-if="selectedFamily === fam.key || hoveredKey === fam.key" class="family-desc">
-            {{ fam.familyDescription }}
+            {{ locale === 'en' ? fam.familyDescriptionEn : fam.familyDescription }}
           </p>
         </div>
 
