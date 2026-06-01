@@ -64,22 +64,17 @@ main,
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   font-size: 1rem;
   font-weight: 720;
 }
 
-.brand-mark {
-  display: inline-grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid #b9d8d3;
+.brand-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
-  background: var(--accent-soft);
-  color: var(--accent-dark);
-  font-size: 0.88rem;
-  font-weight: 800;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -356,7 +351,7 @@ h1 {
     min-height: 62px;
   }
 
-  .brand span:last-child {
+  .brand-name {
     display: none;
   }
 
