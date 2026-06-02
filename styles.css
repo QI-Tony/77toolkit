@@ -223,14 +223,14 @@ h1 {
 .line-dot {
   display: block;
   width: 7px;
-  height: 27.2px;
+  height: var(--line-block-height, 27.2px);
   position: relative;
 }
 
 .line-dot::before {
   content: "";
   position: absolute;
-  top: 10px;
+  top: var(--dot-top, 10px);
   left: 5px;
   width: 5px;
   height: 5px;

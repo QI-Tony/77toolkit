@@ -6,6 +6,8 @@ const sampleBtn = document.querySelector("#sample-btn");
 const charCount = document.querySelector("#char-count");
 const lineMarkers = document.querySelector("#line-markers");
 const statusEl = document.querySelector("#status");
+const measureCanvas = document.createElement("canvas");
+const measureContext = measureCanvas.getContext("2d");
 
 const sampleText = `# Draft copied from an AI chat
 
@@ -37,15 +39,75 @@ function updateCount() {
   charCount.textContent = textBox.value.length.toLocaleString();
 }
 
+function getTextBoxMetrics() {
+  const style = window.getComputedStyle(textBox);
+  const fontSize = Number.parseFloat(style.fontSize) || 16;
+  const lineHeight = Number.parseFloat(style.lineHeight) || fontSize * 1.7;
+  const paddingLeft = Number.parseFloat(style.paddingLeft) || 0;
+  const paddingRight = Number.parseFloat(style.paddingRight) || 0;
+  const availableWidth = Math.max(40, textBox.clientWidth - paddingLeft - paddingRight);
+
+  measureContext.font = style.font;
+
+  return {
+    availableWidth,
+    lineHeight,
+    paddingTop: style.paddingTop,
+    dotTop: Math.max(3, (lineHeight - 5) / 2),
+  };
+}
+
+function countWrappedRows(line, availableWidth) {
+  if (!line) {
+    return 1;
+  }
+
+  const chunks = line.match(/\S+\s*/g) || [line];
+  let rows = 1;
+  let rowWidth = 0;
+
+  for (const chunk of chunks) {
+    const chunkWidth = measureContext.measureText(chunk).width;
+
+    if (chunkWidth <= availableWidth) {
+      if (rowWidth > 0 && rowWidth + chunkWidth > availableWidth) {
+        rows += 1;
+        rowWidth = chunkWidth;
+      } else {
+        rowWidth += chunkWidth;
+      }
+      continue;
+    }
+
+    for (const char of chunk) {
+      const charWidth = measureContext.measureText(char).width;
+      if (rowWidth > 0 && rowWidth + charWidth > availableWidth) {
+        rows += 1;
+        rowWidth = charWidth;
+      } else {
+        rowWidth += charWidth;
+      }
+    }
+  }
+
+  return rows;
+}
+
 function updateLineMarkers() {
+  const metrics = getTextBoxMetrics();
   const markerOffset = -textBox.scrollTop;
   const dots = textBox.value.split("\n").map((line) => {
+    const rows = countWrappedRows(line, metrics.availableWidth);
     const dot = document.createElement("span");
     dot.className = `line-dot ${line.trim() ? "" : "is-empty"}`;
+    dot.style.setProperty("--line-block-height", `${rows * metrics.lineHeight}px`);
+    dot.style.setProperty("--dot-top", `${metrics.dotTop}px`);
     return dot;
   });
 
   lineMarkers.replaceChildren(...dots);
+  lineMarkers.style.minHeight = `${textBox.clientHeight}px`;
+  lineMarkers.style.paddingTop = metrics.paddingTop;
   lineMarkers.style.transform = `translateY(${markerOffset}px)`;
 }
 
@@ -145,6 +207,7 @@ textBox.addEventListener("paste", () => {
 
 textBox.addEventListener("input", updateEditorState);
 textBox.addEventListener("scroll", updateLineMarkers);
+window.addEventListener("resize", updateLineMarkers);
 cleanBtn.addEventListener("click", cleanCurrentText);
 copyBtn.addEventListener("click", copyCleanText);
 
@@ -160,3 +223,7 @@ sampleBtn.addEventListener("click", () => {
 });
 
 updateEditorState();
+
+if ("ResizeObserver" in window) {
+  new ResizeObserver(updateLineMarkers).observe(textBox);
+}
