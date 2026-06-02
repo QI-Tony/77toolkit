@@ -17,3 +17,4 @@ focused browser tools and presents them as a quiet utility workspace.
 
 - Color Spectrum Analyzer: `https://color.77toolkit.com`
 - JSON Fix: `https://jsonfix.77toolkit.com`
+- Text Clean: `https://textclean.77toolkit.com`

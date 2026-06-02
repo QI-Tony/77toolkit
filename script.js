@@ -18,6 +18,15 @@ const tools = [
     status: "live",
   },
   {
+    name: "Text Clean",
+    url: "https://textclean.77toolkit.com",
+    category: "Text",
+    tags: ["Format", "Copy", "Plain Text"],
+    description:
+      "Remove copied AI or rich-text formatting while keeping readable line breaks for easy pasting.",
+    status: "live",
+  },
+  {
     name: "Image Tools",
     url: "",
     category: "Image",
