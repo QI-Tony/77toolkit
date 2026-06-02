@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -16,7 +16,7 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: #020617;
+  background: #f7f8fa;
 }
 
 button,
@@ -29,42 +29,42 @@ input {
   .btn-primary,
   .btn-secondary,
   .btn-danger {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#f7f8fa];
   }
 
   .btn-primary {
-    @apply bg-emerald-400 text-slate-950 hover:bg-emerald-300 focus:ring-emerald-300;
+    @apply bg-[#126b63] text-white hover:bg-[#0f554f] focus:ring-[#2f8a82];
   }
 
   .btn-secondary {
-    @apply border border-slate-700 bg-slate-800 text-slate-100 hover:border-slate-600 hover:bg-slate-700 focus:ring-slate-500;
+    @apply border border-[#dde3ea] bg-white text-[#66717f] hover:border-[#c6d1dc] hover:bg-[#f1f4f7] hover:text-[#18202a] focus:ring-[#b9d8d4];
   }
 
   .btn-danger {
-    @apply border border-red-400/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 focus:ring-red-400;
+    @apply border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:ring-red-300;
   }
 
   .panel {
-    @apply flex min-h-[460px] flex-col overflow-hidden rounded-lg border border-slate-800 bg-slate-900 shadow-2xl shadow-black/20;
+    @apply flex min-h-[460px] flex-col overflow-hidden rounded-lg border border-[#dde3ea] bg-white shadow-[0_12px_32px_rgba(21,31,44,0.08)];
   }
 
   .panel-header {
-    @apply flex min-h-16 items-center justify-between gap-3 border-b border-slate-800 px-4 py-3;
+    @apply flex min-h-16 items-center justify-between gap-3 border-b border-[#dde3ea] px-4 py-3;
   }
 
   .panel-title {
-    @apply text-base font-semibold text-white;
+    @apply text-base font-semibold text-[#18202a];
   }
 
   .panel-meta {
-    @apply mt-1 text-xs text-slate-400;
+    @apply mt-1 text-xs text-[#66717f];
   }
 
   .code-area {
-    @apply min-h-[420px] flex-1 resize-none border-0 bg-slate-950/70 p-4 font-mono text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-600 focus:bg-slate-950;
+    @apply min-h-[420px] flex-1 resize-none border-0 bg-[#f7f8fa] p-4 font-mono text-sm leading-6 text-[#18202a] outline-none placeholder:text-[#8a96a3] focus:bg-white;
   }
 
   .icon-button {
-    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition-colors hover:border-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-700 disabled:hover:bg-slate-800;
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#dde3ea] bg-white text-[#66717f] transition-colors hover:border-[#c6d1dc] hover:bg-[#f1f4f7] hover:text-[#18202a] focus:outline-none focus:ring-2 focus:ring-[#b9d8d4] focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#dde3ea] disabled:hover:bg-white;
   }
 }

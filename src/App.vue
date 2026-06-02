@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { CheckCircle2, Clipboard, Download, FileUp, Languages, RotateCcw, Sparkles, Trash2 } from 'lucide-vue-next'
+import { CheckCircle2, Clipboard, Download, FileUp, Home, Languages, RotateCcw, Sparkles, Trash2 } from 'lucide-vue-next'
 import { jsonrepair } from 'jsonrepair'
 
 const sampleJson = `{
-  name: 'JSON Doctor',
+  name: 'JSON Fix',
   features: ['repair', 'format', 'beautify',],
   localOnly: true,
   note: "Your JSON never leaves your browser",
@@ -57,7 +57,7 @@ const translations = {
   },
   zh: {
     tagline: '在本地修复、格式化并美化 JSON',
-    privacy: '你的 JSON 永远不会离开浏览器',
+    privacy: '你的 JSON 不会离开浏览器',
     repair: '修复并格式化',
     upload: '上传文件',
     sample: '示例 JSON',
@@ -203,24 +203,28 @@ function loadSample() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100">
-    <header class="border-b border-slate-800/90 bg-slate-950/90 backdrop-blur">
+  <div class="min-h-screen bg-[#f7f8fa] text-[#18202a]">
+    <header class="sticky top-0 z-20 border-b border-[#dde3ea]/90 bg-[#f7f8fa]/90 backdrop-blur">
       <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
+          <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#126b63] text-white">
             <Sparkles class="h-5 w-5" />
           </div>
           <div>
-            <h1 class="text-xl font-semibold tracking-normal text-white">JSON Doctor</h1>
-            <p class="text-sm text-slate-400">{{ t.tagline }}</p>
+            <h1 class="text-xl font-semibold tracking-normal text-[#18202a]">JSON Fix</h1>
+            <p class="text-sm text-[#66717f]">{{ t.tagline }}</p>
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-3">
+          <a class="btn-secondary" href="https://77toolkit.com">
+            <Home class="h-4 w-4" />
+            <span>77 Toolkit</span>
+          </a>
           <button class="btn-secondary" type="button" @click="toggleLanguage">
             <Languages class="h-4 w-4" />
             <span>{{ t.switchLanguage }}</span>
           </button>
-          <div class="flex items-center gap-2 rounded-lg border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">
+          <div class="flex items-center gap-2 rounded-lg border border-[#b9d8d4] bg-[#e4f3f1] px-3 py-2 text-sm text-[#0f554f]">
             <CheckCircle2 class="h-4 w-4 shrink-0" />
             <span>{{ t.privacy }}</span>
           </div>
@@ -229,7 +233,7 @@ function loadSample() {
     </header>
 
     <main class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
-      <section class="grid gap-3 rounded-lg border border-slate-800 bg-slate-900/70 p-4 shadow-2xl shadow-black/20 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section class="grid gap-3 rounded-lg border border-[#dde3ea] bg-white p-4 shadow-[0_12px_32px_rgba(21,31,44,0.08)] lg:grid-cols-[1fr_auto] lg:items-center">
         <div class="flex flex-wrap items-center gap-3">
           <button class="btn-primary" type="button" @click="repairAndFormat">
             <Sparkles class="h-4 w-4" />
@@ -253,17 +257,17 @@ function loadSample() {
           </button>
         </div>
 
-        <div class="text-sm text-slate-400">
+        <div class="text-sm text-[#66717f]">
           <span v-if="uploadedFileName">{{ t.loaded }}: {{ uploadedFileName }}</span>
           <span v-else>{{ t.localOnly }}</span>
         </div>
       </section>
 
       <section v-if="successMessage || errorMessage" class="space-y-3">
-        <div v-if="successMessage" class="rounded-lg border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+        <div v-if="successMessage" class="rounded-lg border border-[#b9d8d4] bg-[#e4f3f1] px-4 py-3 text-sm text-[#0f554f]">
           {{ successMessage }}
         </div>
-        <div v-if="errorMessage" class="rounded-lg border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div v-if="errorMessage" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ errorMessage }}
         </div>
       </section>
