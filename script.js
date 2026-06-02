@@ -9,6 +9,15 @@ const tools = [
     status: "live",
   },
   {
+    name: "JSON Fix",
+    url: "https://jsonfix.77toolkit.com",
+    category: "Developer",
+    tags: ["JSON", "Repair", "Format"],
+    description:
+      "Repair malformed JSON, format it for reading, copy the result, or download a clean file locally.",
+    status: "live",
+  },
+  {
     name: "Image Tools",
     url: "",
     category: "Image",
