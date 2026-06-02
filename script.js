@@ -4,6 +4,7 @@ const copyBtn = document.querySelector("#copy-btn");
 const clearBtn = document.querySelector("#clear-btn");
 const sampleBtn = document.querySelector("#sample-btn");
 const charCount = document.querySelector("#char-count");
+const lineMarkers = document.querySelector("#line-markers");
 const statusEl = document.querySelector("#status");
 
 const sampleText = `# Draft copied from an AI chat
@@ -34,6 +35,23 @@ function setStatus(message) {
 
 function updateCount() {
   charCount.textContent = textBox.value.length.toLocaleString();
+}
+
+function updateLineMarkers() {
+  const markerOffset = -textBox.scrollTop;
+  const dots = textBox.value.split("\n").map((line) => {
+    const dot = document.createElement("span");
+    dot.className = `line-dot ${line.trim() ? "" : "is-empty"}`;
+    return dot;
+  });
+
+  lineMarkers.replaceChildren(...dots);
+  lineMarkers.style.transform = `translateY(${markerOffset}px)`;
+}
+
+function updateEditorState() {
+  updateCount();
+  updateLineMarkers();
 }
 
 function removeInlineMarkup(text) {
@@ -84,7 +102,7 @@ function cleanText(value) {
 
   return cleanedLines
     .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\n{2,}/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
     .trim();
 }
@@ -92,8 +110,8 @@ function cleanText(value) {
 function cleanCurrentText() {
   const cleaned = cleanText(textBox.value);
   textBox.value = cleaned;
-  updateCount();
-  setStatus(cleaned ? "Formatting removed. Paragraph spacing is preserved." : "Paste text to clean.");
+  updateEditorState();
+  setStatus(cleaned ? "Formatting removed. Paragraphs use single line breaks." : "Paste text to clean.");
 }
 
 async function copyCleanText() {
@@ -105,7 +123,7 @@ async function copyCleanText() {
   }
 
   textBox.value = cleaned;
-  updateCount();
+  updateEditorState();
 
   try {
     await navigator.clipboard.writeText(cleaned);
@@ -120,18 +138,19 @@ async function copyCleanText() {
 textBox.addEventListener("paste", () => {
   window.setTimeout(() => {
     textBox.value = cleanText(textBox.value);
-    updateCount();
+    updateEditorState();
     setStatus("Pasted text cleaned.");
   }, 0);
 });
 
-textBox.addEventListener("input", updateCount);
+textBox.addEventListener("input", updateEditorState);
+textBox.addEventListener("scroll", updateLineMarkers);
 cleanBtn.addEventListener("click", cleanCurrentText);
 copyBtn.addEventListener("click", copyCleanText);
 
 clearBtn.addEventListener("click", () => {
   textBox.value = "";
-  updateCount();
+  updateEditorState();
   setStatus("Cleared.");
 });
 
@@ -140,4 +159,4 @@ sampleBtn.addEventListener("click", () => {
   cleanCurrentText();
 });
 
-updateCount();
+updateEditorState();

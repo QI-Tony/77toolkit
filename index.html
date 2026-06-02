@@ -43,12 +43,15 @@
           </div>
         </div>
 
-        <textarea
-          id="text-box"
-          spellcheck="false"
-          placeholder="Paste content copied from ChatGPT, Gemini, docs, or web pages..."
-          aria-label="Text to clean"
-        ></textarea>
+        <div class="editor-wrap">
+          <div class="line-markers" id="line-markers" aria-hidden="true"></div>
+          <textarea
+            id="text-box"
+            spellcheck="false"
+            placeholder="Paste content copied from ChatGPT, Gemini, docs, or web pages..."
+            aria-label="Text to clean"
+          ></textarea>
+        </div>
 
         <div class="action-row">
           <div class="left-actions">

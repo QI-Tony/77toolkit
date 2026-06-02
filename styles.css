@@ -206,6 +206,42 @@ h1 {
   white-space: nowrap;
 }
 
+.editor-wrap {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.line-markers {
+  min-height: 420px;
+  overflow: hidden;
+  padding-top: 16px;
+  pointer-events: none;
+}
+
+.line-dot {
+  display: block;
+  width: 7px;
+  height: 27.2px;
+  position: relative;
+}
+
+.line-dot::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #a7c9c5;
+}
+
+.line-dot.is-empty::before {
+  background: transparent;
+}
+
 #text-box {
   display: block;
   width: 100%;
@@ -336,6 +372,15 @@ h1 {
 
   .tool-shell {
     padding: 16px;
+  }
+
+  .editor-wrap {
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .line-markers {
+    min-height: 360px;
   }
 
   #text-box {
