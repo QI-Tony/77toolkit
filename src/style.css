@@ -5,23 +5,24 @@
 }
 
 :root {
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-dark: #4f46e5;
-  --secondary: #8b5cf6;
-  --accent: #ec4899;
-  --bg: #f5f7ff;
+  --primary: #126b63;
+  --primary-light: #2f8a82;
+  --primary-dark: #0f554f;
+  --secondary: #5d6b7d;
+  --accent: #b7791f;
+  --bg: #f7f8fa;
   --card-bg: #ffffff;
-  --border: #e2e8f0;
-  --text: #1e1b4b;
-  --text-muted: #64748b;
+  --surface-muted: #f1f4f7;
+  --border: #dde3ea;
+  --text: #18202a;
+  --text-muted: #66717f;
   --success: #10b981;
   --error: #ef4444;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(99,102,241,0.10), 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 40px rgba(99,102,241,0.15), 0 4px 8px rgba(0,0,0,0.08);
-  --radius: 16px;
-  --radius-sm: 10px;
+  --shadow-sm: 0 1px 3px rgba(21, 31, 44, 0.08), 0 1px 2px rgba(21, 31, 44, 0.04);
+  --shadow-md: 0 12px 32px rgba(21, 31, 44, 0.08);
+  --shadow-lg: 0 16px 40px rgba(21, 31, 44, 0.12);
+  --radius: 8px;
+  --radius-sm: 6px;
 }
 
 html {
@@ -65,10 +66,10 @@ input, textarea {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--surface-muted);
 }
 ::-webkit-scrollbar-thumb {
-  background: #c7d2fe;
+  background: #b7c7d2;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {

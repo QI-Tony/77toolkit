@@ -251,7 +251,7 @@ const centerInfo = computed(() => {
 .center-name {
   font-size: 14px;
   font-weight: 700;
-  fill: #1e1b4b;
+  fill: #18202a;
   font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
@@ -282,12 +282,12 @@ const centerInfo = computed(() => {
 }
 
 .family-item:hover {
-  background: #f5f7ff;
+  background: var(--surface-muted);
 }
 
 .family-item.is-selected {
-  background: #eef2ff;
-  border-color: #c7d2fe;
+  background: #e4f3f1;
+  border-color: #b9d8d4;
 }
 
 .family-item.is-dimmed {

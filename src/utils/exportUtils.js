@@ -82,13 +82,13 @@ export function downloadPalettePNG(colors, filename = '颜色调色板.png') {
 
   // 背景渐变
   const bg = ctx.createLinearGradient(0, 0, canvasW, canvasH)
-  bg.addColorStop(0, '#f5f7ff')
-  bg.addColorStop(1, '#eef2ff')
+  bg.addColorStop(0, '#f7f8fa')
+  bg.addColorStop(1, '#f1f4f7')
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, canvasW, canvasH)
 
   // 标题
-  ctx.fillStyle = '#1e1b4b'
+  ctx.fillStyle = '#18202a'
   ctx.font = `bold ${22}px "PingFang SC","Microsoft YaHei",sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -109,17 +109,17 @@ export function downloadPalettePNG(colors, filename = '颜色调色板.png') {
 
     // 卡片阴影
     ctx.save()
-    ctx.shadowColor = 'rgba(99,102,241,0.15)'
+    ctx.shadowColor = 'rgba(21,31,44,0.12)'
     ctx.shadowBlur = 16
     ctx.shadowOffsetY = 4
     ctx.fillStyle = '#fff'
-    roundRectPath(ctx, x, y, CARD_W, CARD_H, 14)
+    roundRectPath(ctx, x, y, CARD_W, CARD_H, 8)
     ctx.fill()
     ctx.restore()
 
     // 颜色色块（裁剪为圆角顶部）
     ctx.save()
-    roundRectPath(ctx, x, y, CARD_W, CARD_H, 14)
+    roundRectPath(ctx, x, y, CARD_W, CARD_H, 8)
     ctx.clip()
     ctx.fillStyle = color.hex
     ctx.fillRect(x, y, CARD_W, swatchH)
@@ -138,7 +138,7 @@ export function downloadPalettePNG(colors, filename = '颜色调色板.png') {
     ctx.fillStyle = 'rgba(255,255,255,0.9)'
     roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 10)
     ctx.fill()
-    ctx.fillStyle = '#1e1b4b'
+    ctx.fillStyle = '#18202a'
     ctx.font = `bold 11px sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -148,7 +148,7 @@ export function downloadPalettePNG(colors, filename = '颜色调色板.png') {
     const textX = x + CARD_W / 2
     const textBaseY = y + swatchH
 
-    ctx.fillStyle = '#1e1b4b'
+    ctx.fillStyle = '#18202a'
     ctx.font = `bold 15px monospace`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -159,7 +159,7 @@ export function downloadPalettePNG(colors, filename = '颜色调色板.png') {
     ctx.fillText(`rgb(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})`, textX, textBaseY + infoH * 0.46)
     ctx.fillText(`hsl(${color.hsl.h}, ${color.hsl.s}%, ${color.hsl.l}%)`, textX, textBaseY + infoH * 0.66)
 
-    ctx.fillStyle = '#8b5cf6'
+    ctx.fillStyle = '#126b63'
     ctx.font = `11px "PingFang SC","Microsoft YaHei",sans-serif`
     ctx.fillText(color.familyName, textX, textBaseY + infoH * 0.87)
   })

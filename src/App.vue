@@ -128,7 +128,7 @@ function handleDownloadPNG() {
     <header class="app-header">
       <div class="header-inner">
         <div class="logo">
-          <span class="logo-icon">🎨</span>
+          <span class="logo-icon">77</span>
           <div>
             <h1 class="app-title">{{ t('title') }}</h1>
             <p class="app-sub">{{ t('subtitle') }}</p>
@@ -136,6 +136,9 @@ function handleDownloadPNG() {
         </div>
 
         <div class="header-actions">
+          <a class="home-link" href="https://77toolkit.com" aria-label="Back to 77 Toolkit home">
+            77 Toolkit
+          </a>
           <button class="btn-lang" @click="toggleLocale" :title="locale === 'en' ? 'Switch to Chinese' : '切换为英文'">
             {{ locale === 'en' ? '中文' : 'EN' }}
           </button>
@@ -353,9 +356,13 @@ function handleDownloadPNG() {
 
 /* ─── 顶部栏 ─────────────────────────────────────────────────── */
 .app-header {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a21caf 100%);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(247, 248, 250, 0.92);
+  border-bottom: 1px solid rgba(221, 227, 234, 0.9);
   padding: 0 16px;
-  box-shadow: 0 4px 24px rgba(79,70,229,0.25);
+  backdrop-filter: blur(14px);
 }
 
 .header-inner {
@@ -375,29 +382,37 @@ function handleDownloadPNG() {
 }
 
 .logo-icon {
-  font-size: 2.4rem;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
   line-height: 1;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
 }
 
 .app-title {
   font-size: 1.45rem;
   font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.01em;
+  color: var(--text);
+  letter-spacing: 0;
 }
 
 .app-sub {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.75);
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 .reupload-btn {
-  color: rgba(255,255,255,0.88);
-  border: 1.5px solid rgba(255,255,255,0.35);
+  color: var(--primary);
+  border: 1px solid var(--primary);
   padding: 7px 18px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.85rem;
   font-weight: 600;
   transition: background 0.18s, border-color 0.18s;
@@ -405,8 +420,9 @@ function handleDownloadPNG() {
 }
 
 .reupload-btn:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.6);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 .header-actions {
@@ -416,19 +432,44 @@ function handleDownloadPNG() {
 }
 
 .btn-lang {
-  color: rgba(255,255,255,0.88);
-  border: 1.5px solid rgba(255,255,255,0.35);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
   padding: 5px 14px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   transition: background 0.18s, border-color 0.18s;
-  background: rgba(255,255,255,0.10);
+  background: var(--card-bg);
 }
 .btn-lang:hover {
-  background: rgba(255,255,255,0.22);
-  border-color: rgba(255,255,255,0.7);
+  background: var(--surface-muted);
+  border-color: #c6d1dc;
+  color: var(--text);
+}
+
+.home-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 7px 12px;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  white-space: nowrap;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+  background: var(--surface-muted);
+  border-color: #c6d1dc;
+  color: var(--text);
 }
 
 /* ─── 主内容 ─────────────────────────────────────────────────── */
@@ -486,19 +527,19 @@ function handleDownloadPNG() {
 .section-count {
   font-size: 0.78rem;
   font-weight: 600;
-  background: #e0e7ff;
+  background: #e4f3f1;
   color: var(--primary);
   padding: 2px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
 }
 
 .section-subtitle {
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--text-muted);
-  background: #f1f5f9;
+  background: var(--surface-muted);
   padding: 2px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
 }
 
 /* ─── 图片加载占位符 ──────────────────────────────────────────── */
@@ -534,7 +575,7 @@ function handleDownloadPNG() {
 .spinner {
   width: 44px;
   height: 44px;
-  border: 4px solid #e0e7ff;
+  border: 4px solid #dce8e7;
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.85s linear infinite;
@@ -571,7 +612,7 @@ function handleDownloadPNG() {
 
 .btn-chip {
   padding: 6px 16px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 600;
   background: var(--card-bg);
@@ -592,14 +633,14 @@ function handleDownloadPNG() {
 }
 
 .btn-chip.filter-chip {
-  background: #eef2ff;
+  background: #e4f3f1;
   color: var(--primary);
-  border-color: #c7d2fe;
+  border-color: #b9d8d4;
 }
 
 .btn-outline {
   padding: 7px 16px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 600;
   background: transparent;
@@ -794,10 +835,10 @@ function handleDownloadPNG() {
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1e1b4b;
+  background: #18202a;
   color: #fff;
   padding: 10px 22px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.86rem;
   font-weight: 600;
   box-shadow: 0 6px 24px rgba(0,0,0,0.2);

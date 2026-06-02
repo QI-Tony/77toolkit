@@ -125,7 +125,7 @@ async function copyValue(text, key) {
 
 .pct-badge {
   background: rgba(255,255,255,0.88);
-  color: #1e1b4b;
+  color: var(--text);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 8px;
@@ -139,7 +139,7 @@ async function copyValue(text, key) {
   padding: 2px 8px;
   border-radius: 20px;
   background: rgba(255,255,255,0.78);
-  color: #1e1b4b;
+  color: var(--text);
   backdrop-filter: blur(4px);
 }
 
@@ -162,7 +162,7 @@ async function copyValue(text, key) {
 }
 
 .info-row:hover {
-  background: #f0f3ff;
+  background: var(--surface-muted);
 }
 
 .label {

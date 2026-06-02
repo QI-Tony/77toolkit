@@ -578,7 +578,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 7px;
   padding: 8px 20px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.88rem;
   font-weight: 600;
   background: var(--card-bg);
@@ -589,18 +589,18 @@ onBeforeUnmount(() => {
 .tool-btn:hover {
   border-color: var(--primary-light);
   color: var(--primary);
-  background: #f0f3ff;
+  background: var(--surface-muted);
 }
 .tool-btn.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 3px 12px rgba(99,102,241,0.35);
+  box-shadow: 0 3px 12px rgba(18, 107, 99, 0.2);
 }
 
 .tool-clear {
   padding: 7px 16px;
-  border-radius: 50px;
+  border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 600;
   background: transparent;
@@ -692,7 +692,7 @@ onBeforeUnmount(() => {
 .mini-spinner {
   width: 22px;
   height: 22px;
-  border: 3px solid #e0e7ff;
+  border: 3px solid #dce8e7;
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -715,7 +715,7 @@ onBeforeUnmount(() => {
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  border: 2px solid #e0e7ff;
+  border: 1px solid var(--border);
 }
 
 .pc-top {
@@ -751,12 +751,12 @@ onBeforeUnmount(() => {
 
 .pc-family-badge {
   display: inline-block;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #e4f3f1;
+  color: var(--primary);
   font-size: 0.76rem;
   font-weight: 700;
   padding: 3px 12px;
-  border-radius: 20px;
+  border-radius: 6px;
   margin-bottom: 6px;
 }
 
@@ -772,7 +772,7 @@ onBeforeUnmount(() => {
   outline: none;
 }
 .pc-row:hover,
-.pc-row:focus-visible { background: #f0f3ff; }
+.pc-row:focus-visible { background: var(--surface-muted); }
 
 .pc-row-label {
   font-size: 0.66rem;
@@ -864,16 +864,16 @@ onBeforeUnmount(() => {
   color: var(--text);
 }
 .area-count-badge {
-  background: #e0e7ff;
+  background: #e4f3f1;
   color: var(--primary);
   font-size: 0.76rem;
   font-weight: 600;
   padding: 2px 10px;
-  border-radius: 20px;
+  border-radius: 6px;
 }
 .fam-badge {
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #e4f3f1;
+  color: var(--primary);
 }
 
 .area-color-grid {

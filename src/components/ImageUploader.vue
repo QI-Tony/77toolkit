@@ -68,8 +68,8 @@ function processFile(file) {
           <rect width="64" height="64" rx="20" fill="url(#grad)" />
           <defs>
             <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64">
-              <stop offset="0%" stop-color="#818cf8" />
-              <stop offset="100%" stop-color="#a78bfa" />
+              <stop offset="0%" stop-color="#126b63" />
+              <stop offset="100%" stop-color="#2f8a82" />
             </linearGradient>
           </defs>
           <path d="M32 18v20M24 26l8-8 8 8" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -111,9 +111,9 @@ function processFile(file) {
   width: 100%;
   max-width: 520px;
   padding: 52px 32px 44px;
-  border: 2.5px dashed #c7d2fe;
-  border-radius: 24px;
-  background: linear-gradient(145deg, #fafbff 0%, #f0f3ff 100%);
+  border: 2px dashed #b9c6d2;
+  border-radius: var(--radius);
+  background: var(--card-bg);
   cursor: pointer;
   transition: border-color 0.22s, background 0.22s, transform 0.15s;
   user-select: none;
@@ -123,19 +123,19 @@ function processFile(file) {
 .drop-zone:hover,
 .drop-zone:focus-visible {
   border-color: var(--primary);
-  background: linear-gradient(145deg, #f0f3ff 0%, #e5e8ff 100%);
+  background: #f6faf9;
 }
 
 .drop-zone.is-dragging {
   border-color: var(--secondary);
-  background: linear-gradient(145deg, #ede9ff 0%, #ddd6ff 100%);
+  background: #e4f3f1;
   transform: scale(1.01);
 }
 
 .drop-icon svg {
   width: 72px;
   height: 72px;
-  filter: drop-shadow(0 6px 16px rgba(99,102,241,0.25));
+  filter: drop-shadow(0 6px 16px rgba(18, 107, 99, 0.18));
 }
 
 .drop-title {
@@ -156,14 +156,14 @@ function processFile(file) {
   color: #fff;
   font-size: 0.9rem;
   font-weight: 600;
-  border-radius: 50px;
+  border-radius: 7px;
   transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
-  box-shadow: 0 3px 12px rgba(99,102,241,0.35);
+  box-shadow: 0 3px 12px rgba(18, 107, 99, 0.2);
 }
 
 .pick-btn:hover {
   background: var(--primary-dark);
-  box-shadow: 0 5px 18px rgba(99,102,241,0.45);
+  box-shadow: 0 5px 18px rgba(18, 107, 99, 0.25);
   transform: translateY(-1px);
 }
 
