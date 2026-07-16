@@ -44,16 +44,28 @@
           <h1 id="page-title">Tools for everyday digital work</h1>
         </div>
         <p class="intro-text">
-          A growing collection of lightweight browser-based utilities.
+          Nineteen focused utilities for developers, text work, and images.
+          Your content stays in the browser whenever possible.
         </p>
       </section>
 
       <section class="tools-section" id="tools" aria-labelledby="tools-title">
         <div class="section-heading">
-          <h2 id="tools-title">Available tools</h2>
-          <p>Open a focused tool when you need it, then get back to work.</p>
+          <div>
+            <p class="eyebrow">19 tools · 3 categories</p>
+            <h2 id="tools-title">Choose a tool</h2>
+          </div>
+          <p>Search the full collection or browse by category.</p>
         </div>
-        <div class="tool-grid" id="tool-grid" aria-live="polite"></div>
+        <div class="tool-controls">
+          <label class="search-box">
+            <span class="visually-hidden">Search tools</span>
+            <input id="tool-search" type="search" placeholder="Search tools, tasks, or formats…" autocomplete="off">
+          </label>
+          <div class="category-filters" id="category-filters" aria-label="Filter tools"></div>
+        </div>
+        <div id="tool-catalog" aria-live="polite"></div>
+        <p class="empty-state" id="empty-state" hidden>No tools match that search.</p>
       </section>
 
       <section class="about-section" id="about" aria-labelledby="about-title">
@@ -61,9 +73,9 @@
           <h2 id="about-title">About 77 Toolkit</h2>
         </div>
         <p>
-          77 Toolkit collects small, useful web tools in one place. The tools are
-          designed to stay lightweight, load quickly, and handle work in the
-          browser whenever possible.
+          77 Toolkit collects small, useful web tools in one place. Text, tokens,
+          and images are processed locally whenever the browser can do the work,
+          so everyday utilities stay fast and private.
         </p>
       </section>
     </main>

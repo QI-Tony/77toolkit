@@ -7,9 +7,12 @@ combines the homepage and all tools into one `dist` directory:
 dist/
 ├── index.html
 └── tools/
+    ├── _shared/
     ├── color-spectrum/index.html
+    ├── image-compressor/index.html
     ├── json-fix/index.html
-    └── text-clean/index.html
+    ├── text-clean/index.html
+    └── ... 15 more tool routes
 ```
 
 Use these Pages settings:
