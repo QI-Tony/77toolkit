@@ -332,11 +332,6 @@ function handleDownloadPNG() {
       </template>
     </main>
 
-    <!-- ═══ 页脚 ═══ -->
-    <footer class="app-footer">
-      <p>{{ t('footer') }}</p>
-    </footer>
-
     <!-- ═══ Toast 通知 ═══ -->
     <transition name="toast">
       <div v-if="notification" class="toast" role="status">
@@ -818,15 +813,6 @@ function handleDownloadPNG() {
 
 .mono {
   font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
-}
-
-/* ─── 页脚 ────────────────────────────────────────────────────── */
-.app-footer {
-  text-align: center;
-  padding: 18px 16px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
 }
 
 /* ─── Toast ───────────────────────────────────────────────────── */

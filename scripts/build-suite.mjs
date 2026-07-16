@@ -1,5 +1,6 @@
 import { access, cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { toolCatalog } from "../apps/browser-tools/catalog.mjs";
@@ -7,6 +8,13 @@ import { categoryContent, toolContent } from "../apps/browser-tools/content.mjs"
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputRoot = path.join(repositoryRoot, "dist");
+const sharedSourceRoot = path.join(repositoryRoot, "apps/browser-tools/shared");
+
+const sharedAssets = {
+  app: "/tools/_shared/app.js",
+  content: "/tools/_shared/content.css",
+  styles: "/tools/_shared/styles.css",
+};
 
 const sites = [
   {
@@ -70,6 +78,25 @@ async function copyDirectoryContents(source, target) {
       }),
     ),
   );
+}
+
+async function createFingerprintedSharedAssets() {
+  const assetDirectory = path.join(outputRoot, "assets/shared");
+  await mkdir(assetDirectory, { recursive: true });
+
+  for (const [key, fileName] of Object.entries({
+    app: "app.js",
+    content: "content.css",
+    styles: "styles.css",
+  })) {
+    const source = await readFile(path.join(sharedSourceRoot, fileName));
+    const extension = path.extname(fileName);
+    const baseName = path.basename(fileName, extension);
+    const hash = createHash("sha256").update(source).digest("hex").slice(0, 10);
+    const fingerprintedName = `${baseName}-${hash}${extension}`;
+    await writeFile(path.join(assetDirectory, fingerprintedName), source);
+    sharedAssets[key] = `/assets/shared/${fingerprintedName}`;
+  }
 }
 
 function escapeHtml(value) {
@@ -215,8 +242,8 @@ function createStaticPage({ slug, title, description, body, noindex = false, can
     <title>${escapeHtml(title)} — 77 Toolkit</title>
     ${canonicalPath ? `<link rel="canonical" href="https://77toolkit.com${escapeHtml(canonicalPath)}">` : ""}
     ${noindex ? "" : createSocialMeta(`${title} — 77 Toolkit`, description, canonicalPath)}
-    <link rel="stylesheet" href="/tools/_shared/styles.css">
-    <link rel="stylesheet" href="/tools/_shared/content.css">
+    <link rel="stylesheet" href="${sharedAssets.styles}">
+    <link rel="stylesheet" href="${sharedAssets.content}">
   </head>
   <body>
     ${createPrimaryHeader()}
@@ -279,15 +306,26 @@ function injectExistingToolContent(html, tool) {
   const headContent = `
     ${createSocialMeta(`${tool.name} — 77 Toolkit`, `${tool.description} Runs locally in your browser.`, `/tools/${tool.slug}/`)}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3812186991635556" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/tools/_shared/content.css">
+    <link rel="stylesheet" href="${sharedAssets.content}">
     <script type="application/ld+json">${createToolStructuredData(tool)}</script>`;
   let result = html.replace("</head>", `${headContent}\n  </head>`);
   const article = `${createPublisherContent(tool)}\n`;
 
-  if (result.includes("</main>")) {
+  if (result.includes('<div id="app"></div>')) {
+    result = result.replace(
+      '<div id="app"></div>',
+      `<div id="app"></div>\n${article}${createLegalFooter()}`,
+    );
+  } else if (result.includes("</main>")) {
     result = result.replace("</main>", `</main>\n${article}`);
   } else {
-    result = result.replace(/(<script\s+type="module")/, `${article}${createLegalFooter()}\n$1`);
+    result = result.replace("</body>", `${article}${createLegalFooter()}\n</body>`);
+  }
+
+  const bodyStart = result.indexOf("<body");
+  const articleStart = result.indexOf('<article class="publisher-content"');
+  if (bodyStart === -1 || articleStart < bodyStart) {
+    throw new Error(`Publisher content was inserted outside the body for ${tool.slug}.`);
   }
 
   return result;
@@ -319,8 +357,8 @@ function createToolPage(tool) {
     <link rel="canonical" href="https://77toolkit.com/tools/${escapeHtml(tool.slug)}/">
     ${createSocialMeta(`${tool.name} — 77 Toolkit`, `${tool.description} Runs locally in your browser.`, `/tools/${tool.slug}/`)}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3812186991635556" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/tools/_shared/styles.css">
-    <link rel="stylesheet" href="/tools/_shared/content.css">
+    <link rel="stylesheet" href="${sharedAssets.styles}">
+    <link rel="stylesheet" href="${sharedAssets.content}">
     <script type="application/ld+json">${createToolStructuredData(tool)}</script>
   </head>
   <body>
@@ -337,7 +375,7 @@ function createToolPage(tool) {
     </main>
     ${createLegalFooter()}
     <script id="tool-config" type="application/json">${config}</script>
-    <script type="module" src="/tools/_shared/app.js"></script>
+    <script type="module" src="${sharedAssets.app}"></script>
   </body>
 </html>
 `;
@@ -355,9 +393,10 @@ for (const site of sites) {
 }
 
 await copyDirectoryContents(
-  path.join(repositoryRoot, "apps/browser-tools/shared"),
+  sharedSourceRoot,
   path.join(outputRoot, "tools/_shared"),
 );
+await createFingerprintedSharedAssets();
 
 for (const tool of toolCatalog.filter((candidate) => candidate.implementation === "shared")) {
   const toolDirectory = path.join(outputRoot, "tools", tool.slug);
