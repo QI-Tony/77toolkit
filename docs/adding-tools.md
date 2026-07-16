@@ -3,9 +3,11 @@
 Small local-first utilities should use the shared tool runtime:
 
 1. Add the tool metadata to `apps/browser-tools/catalog.mjs`.
-2. Add a renderer to `apps/browser-tools/shared/app.js`.
-3. Register the renderer by slug at the bottom of that file.
-4. Run `npm run build`; the root build creates its page, canonical URL,
+2. Add unique task guidance, examples, limitations, and FAQs to
+   `apps/browser-tools/content.mjs`.
+3. Add a renderer to `apps/browser-tools/shared/app.js`.
+4. Register the renderer by slug at the bottom of that file.
+5. Run `npm run build`; the root build creates its page, canonical URL,
    redirect, sitemap entry, homepage card, and related-tool links.
 
 Use a separate `apps/<tool-slug>` workspace only when a tool needs a larger

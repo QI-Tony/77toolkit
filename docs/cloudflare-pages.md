@@ -6,6 +6,12 @@ combines the homepage and all tools into one `dist` directory:
 ```text
 dist/
 ├── index.html
+├── 404.html
+├── about/index.html
+├── privacy/index.html
+├── developer/index.html
+├── text/index.html
+├── image/index.html
 └── tools/
     ├── _shared/
     ├── color-spectrum/index.html

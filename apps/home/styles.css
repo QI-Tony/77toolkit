@@ -257,6 +257,14 @@ h1 {
   font-size: 1rem;
 }
 
+.category-heading h3 a:hover,
+.category-heading h3 a:focus-visible {
+  color: var(--accent-dark);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .category-heading span,
 .empty-state {
   color: var(--muted);
@@ -428,6 +436,14 @@ h1 {
   color: var(--muted);
 }
 
+.text-link {
+  display: inline;
+  color: var(--accent-dark);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .site-footer {
   display: flex;
   justify-content: space-between;
@@ -440,6 +456,25 @@ h1 {
 
 .site-footer p {
   margin-bottom: 0;
+}
+
+.site-footer > div p + p {
+  margin-top: 5px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 16px;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  color: var(--accent-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .visually-hidden {
@@ -536,5 +571,10 @@ h1 {
 
   .site-footer p + p {
     margin-top: 6px;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+    margin-top: 12px;
   }
 }

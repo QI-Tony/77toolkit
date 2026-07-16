@@ -330,6 +330,25 @@ h1 {
   margin-bottom: 0;
 }
 
+.site-footer > div p + p {
+  margin-top: 5px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 15px;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  color: var(--accent-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 @media (max-width: 760px) {
   .intro {
     grid-template-columns: 1fr;
@@ -393,5 +412,10 @@ h1 {
 
   .site-footer p + p {
     margin-top: 6px;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+    margin-top: 12px;
   }
 }

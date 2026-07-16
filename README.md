@@ -57,6 +57,7 @@ npm run build:all
 - [Deploy the unified site with Cloudflare Pages](docs/cloudflare-pages.md)
 - [Add backend features with Cloudflare Workers](docs/cloudflare-workers.md)
 - [Plan and add more tools](docs/adding-tools.md)
+- [Review AdSense and search readiness](docs/adsense-readiness.md)
 
 The four original repositories are unchanged. Their histories were imported
 into the corresponding `apps/*` directories.
