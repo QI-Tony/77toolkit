@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Remove copied AI text formatting while preserving readable paragraphs."
+    >
+    <title>Format Remove | 77 Toolkit</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="https://77toolkit.com" aria-label="Back to 77 Toolkit">
+          <span class="brand-mark">77</span>
+          <span class="brand-name">77 Toolkit</span>
+        </a>
+        <a class="home-link" href="https://77toolkit.com">Back Home</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Text utility</p>
+          <h1 id="page-title">Format Remove</h1>
+        </div>
+        <p class="intro-text">
+          Paste copied AI text, remove extra formatting, and keep paragraphs easy to copy elsewhere.
+        </p>
+      </section>
+
+      <section class="tool-shell" aria-labelledby="tool-title">
+        <div class="tool-heading">
+          <div>
+            <h2 id="tool-title">Clean text box</h2>
+            <p>Works locally in your browser. Paste rich text or Markdown-style content.</p>
+          </div>
+          <div class="counter" aria-live="polite">
+            <span id="char-count">0</span> characters
+          </div>
+        </div>
+
+        <div class="editor-wrap">
+          <div class="line-markers" id="line-markers" aria-hidden="true"></div>
+          <textarea
+            id="text-box"
+            spellcheck="false"
+            placeholder="Paste content copied from ChatGPT, Gemini, docs, or web pages..."
+            aria-label="Text to clean"
+          ></textarea>
+        </div>
+
+        <div class="action-row">
+          <div class="left-actions">
+            <button class="btn-primary" id="clean-btn" type="button">Clean Format</button>
+            <button class="btn-secondary" id="copy-btn" type="button">Copy Clean Text</button>
+          </div>
+          <div class="right-actions">
+            <button class="btn-secondary" id="sample-btn" type="button">Sample</button>
+            <button class="btn-danger" id="clear-btn" type="button">Clear</button>
+          </div>
+        </div>
+
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; 2026 77 Toolkit</p>
+      <p>Simple text cleanup for everyday copying.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
