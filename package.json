@@ -1,0 +1,26 @@
+{
+  "name": "77toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "workers/*"
+  ],
+  "scripts": {
+    "dev:home": "npm run dev --workspace=@77toolkit/home",
+    "dev:color": "npm run dev --workspace=@77toolkit/color-spectrum",
+    "dev:json": "npm run dev --workspace=@77toolkit/json-fix",
+    "dev:text": "npm run dev --workspace=@77toolkit/text-clean",
+    "dev:api": "npm run dev --workspace=@77toolkit/api",
+    "build": "npm run build --workspaces --if-present",
+    "build:home": "npm run build --workspace=@77toolkit/home",
+    "build:color": "npm run build --workspace=@77toolkit/color-spectrum",
+    "build:json": "npm run build --workspace=@77toolkit/json-fix",
+    "build:text": "npm run build --workspace=@77toolkit/text-clean",
+    "build:api": "npm run build --workspace=@77toolkit/api",
+    "deploy:api": "npm run deploy --workspace=@77toolkit/api"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
