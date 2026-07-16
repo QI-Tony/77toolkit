@@ -216,7 +216,7 @@ function loadSample() {
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <a class="btn-secondary" href="https://77toolkit.com">
+          <a class="btn-secondary" href="/">
             <Home class="h-4 w-4" />
             <span>77 Toolkit</span>
           </a>

@@ -1,46 +1,52 @@
 # Cloudflare Pages deployment
 
-Cloudflare Pages supports multiple Pages projects connected to the same Git
-repository. Keep four distinct Pages projects so that every site retains its
-own domain, deployment history, and preview URL.
+Deploy the complete toolkit as one Cloudflare Pages project. The root build
+combines the homepage and all tools into one `dist` directory:
 
-Use **Build System V2 or later**. Leave the Pages root directory at the
-repository root and configure each project as follows:
+```text
+dist/
+├── index.html
+└── tools/
+    ├── color-spectrum/index.html
+    ├── json-fix/index.html
+    └── text-clean/index.html
+```
 
-Set the environment variable `NODE_VERSION` to `22` for both production and
-preview builds.
+Use these Pages settings:
 
-| Pages project | Production domain | Build command | Output directory | Build watch include paths |
-| --- | --- | --- | --- | --- |
-| `77toolkit-home` | `77toolkit.com` | `npm run build:home` | `apps/home/dist` | `apps/home/*, package.json, package-lock.json` |
-| `77toolkit-color` | `color.77toolkit.com` | `npm run build:color` | `apps/color-spectrum/dist` | `apps/color-spectrum/*, package.json, package-lock.json` |
-| `77toolkit-json` | `jsonfix.77toolkit.com` | `npm run build:json` | `apps/json-fix/dist` | `apps/json-fix/*, package.json, package-lock.json` |
-| `77toolkit-text` | `textclean.77toolkit.com` | `npm run build:text` | `apps/text-clean/dist` | `apps/text-clean/*, package.json, package-lock.json` |
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Framework preset | `None` |
+| Root directory | leave blank |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Environment variable | `NODE_VERSION=22` |
 
 ## Connect the repository
 
-For each Pages project:
+Create or update the production Pages project:
 
 1. Open **Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git**.
-2. Select the new monorepo. A single repository can be selected repeatedly.
-3. Enter the build command and output directory from the table above.
-4. After the first successful deployment, open **Custom domains** and attach
-   the corresponding production domain.
-5. Under **Settings → Build → Build watch paths**, enter the include paths from
-   the table. This prevents an unrelated tool change from rebuilding every
-   Pages project.
+2. Select the `QI-Tony/77toolkit` repository.
+3. Enter the build settings from the table above.
+4. Select **Save and Deploy**.
+5. Verify the generated `*.pages.dev` URL before moving the production domain.
+6. Open **Custom domains** and attach `77toolkit.com`.
 
-Do not move the existing production domain until the corresponding new Pages
-project has a successful preview deployment. Move one domain at a time and test
-it before continuing.
+Every push to `main` now rebuilds the single Pages project. Preview branches
+also receive all tool routes under their generated `*.pages.dev` URL.
 
-## Project limit and future tools
+## Migrate the old subdomains
 
-Cloudflare currently allows up to five Pages projects connected to one
-repository by default. These four projects therefore leave room for one more.
-For a larger catalog, choose one of these approaches:
+Keep the existing tool Pages projects online until the unified deployment is
+verified. Then create permanent Cloudflare redirect rules:
 
-- publish related small tools under paths in one Pages project, such as
-  `77toolkit.com/tools/timestamp`;
-- request a Pages project limit increase from Cloudflare; or
-- deploy additional tools with Workers Static Assets.
+| Old hostname | Destination | Status |
+| --- | --- | --- |
+| `color.77toolkit.com/*` | `https://77toolkit.com/tools/color-spectrum/` | `301` |
+| `jsonfix.77toolkit.com/*` | `https://77toolkit.com/tools/json-fix/` | `301` |
+| `textclean.77toolkit.com/*` | `https://77toolkit.com/tools/text-clean/` | `301` |
+
+Test all three redirects before deleting the old Pages projects. Keep
+`api.77toolkit.com` separate for the shared Worker.

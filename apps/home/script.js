@@ -1,7 +1,7 @@
 const tools = [
   {
     name: "Color Spectrum Analyzer",
-    url: "https://color.77toolkit.com",
+    url: "/tools/color-spectrum/",
     category: "Image",
     tags: ["Color", "Palette", "Local"],
     description:
@@ -10,7 +10,7 @@ const tools = [
   },
   {
     name: "JSON Fix",
-    url: "https://jsonfix.77toolkit.com",
+    url: "/tools/json-fix/",
     category: "Developer",
     tags: ["JSON", "Repair", "Format"],
     description:
@@ -19,7 +19,7 @@ const tools = [
   },
   {
     name: "Text Clean",
-    url: "https://textclean.77toolkit.com",
+    url: "/tools/text-clean/",
     category: "Text",
     tags: ["Format", "Copy", "Plain Text"],
     description:

@@ -136,7 +136,7 @@ function handleDownloadPNG() {
         </div>
 
         <div class="header-actions">
-          <a class="home-link" href="https://77toolkit.com" aria-label="Back to 77 Toolkit home">
+          <a class="home-link" href="/" aria-label="Back to 77 Toolkit home">
             77 Toolkit
           </a>
           <button class="btn-lang" @click="toggleLocale" :title="locale === 'en' ? 'Switch to Chinese' : '切换为英文'">
