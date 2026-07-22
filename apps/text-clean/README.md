@@ -1,4 +1,4 @@
-# Format Remove
+# Text Clean
 
 A static 77 Toolkit-style web page for removing copied text formatting.
 

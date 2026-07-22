@@ -1,4 +1,4 @@
-# Color Spectrum Analyzer
+# Color Spectrum
 
 A Vue 3 web application that extracts and analyzes dominant colors from uploaded images using K-Means++ clustering.
 

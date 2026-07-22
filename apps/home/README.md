@@ -13,8 +13,9 @@ focused browser tools and presents them as a quiet utility workspace.
 - Tool metadata is scannable: category pill, live/coming-soon status, short description, tags, and one clear action.
 - The overall tone is lightweight, calm, practical, and browser-native rather than decorative or marketing-heavy.
 
-## Listed Tools
+## Published content
 
-- Color Spectrum Analyzer: `https://color.77toolkit.com`
-- JSON Fix: `https://jsonfix.77toolkit.com`
-- Text Clean: `https://textclean.77toolkit.com`
+- 19 tools under `https://77toolkit.com/tools/<tool>/`
+- Developer, Text, and Image category pages
+- Eight practical guides under `https://77toolkit.com/guides/`
+- About, Privacy, Terms, and Contact pages

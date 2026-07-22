@@ -714,7 +714,7 @@ mark {
   }
 
   .brand-name,
-  .nav-links a:not(:first-child) {
+  .nav-links a:not(:first-child):not(:last-child) {
     display: none;
   }
 

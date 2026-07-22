@@ -136,9 +136,11 @@ function handleDownloadPNG() {
         </div>
 
         <div class="header-actions">
-          <a class="home-link" href="/" aria-label="Back to 77 Toolkit home">
-            77 Toolkit
-          </a>
+          <a class="home-link" href="/" aria-label="Browse all 77 Toolkit tools">All tools</a>
+          <a class="home-link category-link" href="/developer/">Developer</a>
+          <a class="home-link category-link" href="/text/">Text</a>
+          <a class="home-link category-link" href="/image/">Image</a>
+          <a class="home-link" href="/guides/">Guides</a>
           <button class="btn-lang" @click="toggleLocale" :title="locale === 'en' ? 'Switch to Chinese' : '切换为英文'">
             {{ locale === 'en' ? '中文' : 'EN' }}
           </button>
@@ -465,6 +467,16 @@ function handleDownloadPNG() {
   background: var(--surface-muted);
   border-color: #c6d1dc;
   color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .category-link {
+    display: none;
+  }
+
+  .app-sub {
+    display: none;
+  }
 }
 
 /* ─── 主内容 ─────────────────────────────────────────────────── */

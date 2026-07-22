@@ -5,10 +5,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { toolCatalog } from "../apps/browser-tools/catalog.mjs";
 import { categoryContent, toolContent } from "../apps/browser-tools/content.mjs";
+import { toolEditorial } from "../apps/browser-tools/editorial.mjs";
+import { guideCatalog } from "../apps/browser-tools/guides.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputRoot = path.join(repositoryRoot, "dist");
 const sharedSourceRoot = path.join(repositoryRoot, "apps/browser-tools/shared");
+const siteUpdated = "2026-07-22";
 
 const sharedAssets = {
   app: "/tools/_shared/app.js",
@@ -109,6 +112,7 @@ function escapeHtml(value) {
 }
 
 const informationLinks = [
+  ["Guides", "/guides/"],
   ["About", "/about/"],
   ["Privacy", "/privacy/"],
   ["Terms", "/terms/"],
@@ -119,9 +123,19 @@ function createPrimaryHeader() {
   return `<header class="site-header">
       <nav class="nav" aria-label="Primary navigation">
         <a class="brand" href="/" aria-label="77 Toolkit home"><span class="brand-mark">77</span><span class="brand-name">77 Toolkit</span></a>
-        <div class="nav-links"><a href="/#tools">All tools</a><a href="/developer/">Developer</a><a href="/text/">Text</a><a href="/image/">Image</a></div>
+        <div class="nav-links"><a href="/#tools">All tools</a><a href="/developer/">Developer</a><a href="/text/">Text</a><a href="/image/">Image</a><a href="/guides/">Guides</a></div>
       </nav>
     </header>`;
+}
+
+function createIconMeta() {
+  return `<link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" href="/favicon-64.png" sizes="64x64">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">`;
+}
+
+function createAdSenseLoader() {
+  return `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3812186991635556" crossorigin="anonymous"></script>`;
 }
 
 function createLegalFooter() {
@@ -151,14 +165,32 @@ function createSocialMeta(title, description, pathName) {
 function createPublisherContent(tool) {
   const content = toolContent[tool.slug];
   if (!content) throw new Error(`Missing publisher content for ${tool.slug}.`);
+  const editorial = toolEditorial[tool.slug];
+  if (!editorial) throw new Error(`Missing editorial content for ${tool.slug}.`);
   const steps = content.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("");
   const limitations = content.limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const scenarios = editorial.scenarios
+    .map(
+      ({ title, text }) => `<article class="publisher-use-case"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></article>`,
+    )
+    .join("");
+  const checklist = editorial.checklist.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   const faqs = content.faqs
     .map(
       ({ question, answer }) => `<details>
           <summary>${escapeHtml(question)}</summary>
           <p>${escapeHtml(answer)}</p>
         </details>`,
+    )
+    .join("");
+  const relatedGuides = editorial.relatedGuides
+    .map((slug) => {
+      const guide = guideCatalog.find((candidate) => candidate.slug === slug);
+      if (!guide) throw new Error(`Unknown related guide ${slug} in ${tool.slug}.`);
+      return guide;
+    })
+    .map(
+      (guide) => `<a class="publisher-guide-card" href="/guides/${escapeHtml(guide.slug)}/"><span>${escapeHtml(guide.kicker)}</span><strong>${escapeHtml(guide.title)}</strong><small>${escapeHtml(guide.readingTime)} →</small></a>`,
     )
     .join("");
 
@@ -174,7 +206,10 @@ function createPublisherContent(tool) {
         <section class="publisher-card"><h3>How it works</h3><p>${escapeHtml(content.howItWorks)}</p></section>
         <section class="publisher-card"><h3>Important limitations</h3><ul>${limitations}</ul></section>
       </div>
+      <section class="publisher-section" aria-labelledby="use-cases-${escapeHtml(tool.slug)}"><div class="publisher-section__header"><p class="publisher-content__eyebrow">Real workflows</p><h2 id="use-cases-${escapeHtml(tool.slug)}">When this tool is useful</h2></div><div class="publisher-use-case-grid">${scenarios}</div></section>
+      <section class="publisher-review-grid" aria-label="Result review guidance"><article class="publisher-review"><p class="publisher-content__eyebrow">Review the result</p><h2>What to check before using the output</h2><p>${escapeHtml(editorial.review)}</p><ul class="publisher-checklist">${checklist}</ul></article><article class="publisher-review publisher-review--soft"><p class="publisher-content__eyebrow">Choose the right method</p><h2>When another tool is better</h2><p>${escapeHtml(editorial.alternative)}</p><h3>Privacy and browser behavior</h3><p>${escapeHtml(editorial.privacy)}</p></article></section>
       <section class="publisher-faq" aria-labelledby="faq-${escapeHtml(tool.slug)}"><h2 id="faq-${escapeHtml(tool.slug)}">Frequently asked questions</h2>${faqs}</section>
+      ${relatedGuides ? `<section class="publisher-section publisher-related-guides" aria-labelledby="related-guides-${escapeHtml(tool.slug)}"><div class="publisher-section__header"><p class="publisher-content__eyebrow">Go deeper</p><h2 id="related-guides-${escapeHtml(tool.slug)}">Related guides</h2></div><div class="publisher-guide-grid">${relatedGuides}</div></section>` : ""}
     </article>`;
 }
 
@@ -230,7 +265,80 @@ function createHomeCatalogMarkup() {
     .join("");
 }
 
-function createStaticPage({ slug, title, description, body, noindex = false, canonicalPath = `/${slug ? `${slug}/` : ""}` }) {
+function createGuideCard(guide) {
+  return `<a class="guide-card" href="/guides/${escapeHtml(guide.slug)}/"><div><span>${escapeHtml(guide.kicker)}</span><h2>${escapeHtml(guide.title)}</h2><p>${escapeHtml(guide.description)}</p></div><small>${escapeHtml(guide.readingTime)} · Read guide →</small></a>`;
+}
+
+function createHomeGuideMarkup() {
+  return guideCatalog.slice(0, 3).map(createGuideCard).join("");
+}
+
+function createArticleStructuredData(guide) {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: guide.title,
+        description: guide.description,
+        datePublished: guide.published,
+        dateModified: guide.updated,
+        image: "https://77toolkit.com/og.png",
+        inLanguage: "en",
+        author: { "@type": "Organization", name: "77 Toolkit", url: "https://77toolkit.com/about/" },
+        publisher: { "@type": "Organization", name: "77 Toolkit", url: "https://77toolkit.com/" },
+        mainEntityOfPage: `https://77toolkit.com/guides/${guide.slug}/`,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "77 Toolkit", item: "https://77toolkit.com/" },
+          { "@type": "ListItem", position: 2, name: "Guides", item: "https://77toolkit.com/guides/" },
+          { "@type": "ListItem", position: 3, name: guide.title, item: `https://77toolkit.com/guides/${guide.slug}/` },
+        ],
+      },
+    ],
+  }).replaceAll("<", "\\u003c");
+}
+
+function createGuideIndexPage() {
+  return createStaticPage({
+    slug: "guides",
+    title: "Practical Guides",
+    description: "Original guides for repairing developer data, handling tokens safely, preparing images, testing patterns, and improving accessibility.",
+    body: `<header class="static-hero guide-index-hero"><p class="static-eyebrow">Editorial library</p><h1>Understand the work behind the tool</h1><p>These guides explain decisions, limitations, and review steps that a one-click result cannot settle on its own.</p></header><div class="category-copy"><p>Each article is written around a real workflow and links to the relevant local browser tools. The goal is not to add filler around a utility, but to show when an operation is appropriate, what can go wrong, and how to verify the output.</p></div><section class="guide-grid" aria-label="All practical guides">${guideCatalog.map(createGuideCard).join("")}</section>`,
+  });
+}
+
+function createGuidePage(guide) {
+  const sections = guide.sections
+    .map(
+      (section) => `<section><h2>${escapeHtml(section.heading)}</h2>${section.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}${section.bullets ? `<ul>${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}</section>`,
+    )
+    .join("");
+  const relatedTools = guide.relatedTools
+    .map((slug) => {
+      const tool = toolCatalog.find((candidate) => candidate.slug === slug);
+      if (!tool) throw new Error(`Unknown related tool ${slug} in guide ${guide.slug}.`);
+      return tool;
+    })
+    .map((tool) => `<a href="/tools/${escapeHtml(tool.slug)}/"><strong>${escapeHtml(tool.name)}</strong><span>${escapeHtml(tool.description)}</span></a>`)
+    .join("");
+  const resources = guide.resources
+    .map((resource) => `<li><a href="${escapeHtml(resource.url)}" rel="noreferrer">${escapeHtml(resource.label)}</a></li>`)
+    .join("");
+
+  return createStaticPage({
+    slug: guide.slug,
+    title: guide.title,
+    description: guide.description,
+    canonicalPath: `/guides/${guide.slug}/`,
+    structuredData: createArticleStructuredData(guide),
+    body: `<article class="guide-article"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">77 Toolkit</a><span>/</span><a href="/guides/">Guides</a><span>/</span><span>${escapeHtml(guide.title)}</span></nav><header class="guide-hero"><p class="static-eyebrow">${escapeHtml(guide.kicker)}</p><h1>${escapeHtml(guide.title)}</h1><p>${escapeHtml(guide.description)}</p><div class="guide-meta"><span>${escapeHtml(guide.readingTime)}</span><span>Published ${escapeHtml(guide.published)}</span><span>Updated ${escapeHtml(guide.updated)}</span></div></header><div class="guide-layout"><div class="guide-body">${sections}<aside class="guide-takeaway"><strong>Key takeaway</strong><p>${escapeHtml(guide.takeaway)}</p></aside><section class="guide-resources"><h2>Primary references</h2><ul>${resources}</ul></section></div><aside class="guide-sidebar"><p class="publisher-content__eyebrow">Use the related tools</p><div>${relatedTools}</div><a class="guide-all-link" href="/guides/">Browse all guides →</a></aside></div></article>`,
+  });
+}
+
+function createStaticPage({ slug, title, description, body, noindex = false, canonicalPath = `/${slug ? `${slug}/` : ""}`, structuredData = null }) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -242,8 +350,11 @@ function createStaticPage({ slug, title, description, body, noindex = false, can
     <title>${escapeHtml(title)} — 77 Toolkit</title>
     ${canonicalPath ? `<link rel="canonical" href="https://77toolkit.com${escapeHtml(canonicalPath)}">` : ""}
     ${noindex ? "" : createSocialMeta(`${title} — 77 Toolkit`, description, canonicalPath)}
+    ${createIconMeta()}
+    ${noindex ? "" : createAdSenseLoader()}
     <link rel="stylesheet" href="${sharedAssets.styles}">
     <link rel="stylesheet" href="${sharedAssets.content}">
+    ${structuredData ? `<script type="application/ld+json">${structuredData}</script>` : ""}
   </head>
   <body>
     ${createPrimaryHeader()}
@@ -279,33 +390,117 @@ function createTrustPages() {
       slug: "about",
       title: "About",
       description: "Learn why 77 Toolkit exists, how its local-first tools work, and how the project is maintained.",
-      body: `<header class="static-hero"><p class="static-eyebrow">About the project</p><h1>Small tools, clearly explained</h1><p>77 Toolkit is an independent collection of focused browser utilities for developer data, text, and images.</p></header><div class="trust-grid"><section class="trust-card"><h2>Useful by design</h2><p>Each page handles one understandable task and explains its method, limitations, and expected result.</p></section><section class="trust-card"><h2>Local where possible</h2><p>Public tools process pasted text and selected files in the browser whenever modern Web APIs make that practical.</p></section><section class="trust-card"><h2>Open development</h2><p>The source and change history are available on GitHub so problems and improvements can be reviewed publicly.</p></section></div><div class="static-prose"><h2>Why the site exists</h2><p>Many everyday digital tasks are too small for a full application but too sensitive for an unknown upload service. 77 Toolkit keeps these tasks in simple, bookmarkable pages and describes what each operation can and cannot guarantee.</p><h2>How tools are reviewed</h2><p>New tools are tested with representative inputs, clear errors, keyboard-accessible controls, and production build checks. Documentation is updated when behavior or browser limitations change. Security-critical results, including decoded tokens and hashes, still require validation in the system where they will be used.</p><h2>Funding and independence</h2><p>The site may use Google AdSense to help cover hosting and maintenance. Advertising does not change tool output, and ads are kept separate from primary actions and download controls.</p><h2>Project owner and feedback</h2><p>77 Toolkit is maintained through the <a href="https://github.com/QI-Tony/77toolkit">QI-Tony/77toolkit GitHub repository</a>. Bug reports and feature suggestions can be submitted through its public issue tracker.</p><p class="static-meta">Last updated: July 16, 2026</p></div>`,
+      body: `<header class="static-hero"><p class="static-eyebrow">About the project</p><h1>Small tools, clearly explained</h1><p>77 Toolkit is an independent collection of focused browser utilities for developer data, text, and images.</p></header><div class="trust-grid"><section class="trust-card"><h2>Useful by design</h2><p>Each page handles one understandable task and explains its method, limitations, and expected result.</p></section><section class="trust-card"><h2>Local where possible</h2><p>Public tools process pasted text and selected files in the browser whenever modern Web APIs make that practical.</p></section><section class="trust-card"><h2>Open development</h2><p>The source and change history are available on GitHub so problems and improvements can be reviewed publicly.</p></section></div><div class="static-prose"><h2>Why the site exists</h2><p>Many everyday digital tasks are too small for a full application but too sensitive for an unknown upload service. 77 Toolkit keeps these tasks in simple, bookmarkable pages and describes what each operation can and cannot guarantee.</p><h2>How tools are reviewed</h2><p>New tools are tested with representative inputs, clear errors, keyboard-accessible controls, and production build checks. Documentation is updated when behavior or browser limitations change. Security-critical results, including decoded tokens and hashes, still require validation in the system where they will be used.</p><h2>Funding and independence</h2><p>The site may use Google AdSense to help cover hosting and maintenance. Advertising does not change tool output, and ads are kept separate from primary actions and download controls.</p><h2>Project owner and feedback</h2><p>77 Toolkit is maintained through the <a href="https://github.com/QI-Tony/77toolkit">QI-Tony/77toolkit GitHub repository</a>. Bug reports and feature suggestions can be submitted through its public issue tracker.</p><p class="static-meta">Last updated: July 22, 2026</p></div>`,
     }),
     privacy: createStaticPage({
       slug: "privacy",
       title: "Privacy Policy",
       description: "How 77 Toolkit processes local tool input, standard website requests, advertising data, and privacy choices.",
-      body: `<header class="static-hero"><p class="static-eyebrow">Privacy policy</p><h1>Privacy, without vague promises</h1><p>This page explains what stays in your browser, what infrastructure providers can receive, and how advertising cookies may be used.</p></header><div class="static-prose"><h2>Tool inputs and files</h2><p>77 Toolkit's public text, developer, and image utilities are designed to process pasted values and selected files in the active browser tab. The site does not currently operate an account system or a public upload API for these tools, and it does not intentionally transmit tool input to a 77 Toolkit server. Closing or refreshing a page normally clears its working state.</p><h2>Website request data</h2><p>The site is delivered through Cloudflare. Like other hosting and security providers, Cloudflare may process request information such as IP address, browser and device information, requested URL, timestamps, security signals, and diagnostic logs to deliver and protect the service. See <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's Privacy Policy</a>.</p><h2>Google advertising and cookies</h2><p>Pages may include Google AdSense. Third-party vendors, including Google, use cookies or similar technologies to serve and measure ads. Google's use of advertising cookies enables Google and its partners to serve ads based on visits to this site and other sites. Users can manage personalized advertising in <a href="https://adssettings.google.com/">Google Ads Settings</a> and learn more at <a href="https://policies.google.com/technologies/ads">How Google uses information for advertising</a>.</p><p>Where consent is legally required, advertising and storage choices should be presented through a Google-certified consent management message. Availability and exact choices can depend on region and the site's current AdSense configuration.</p><h2>External links</h2><p>Links to GitHub, Google, Cloudflare, and other external sites are governed by those services' own privacy practices. 77 Toolkit does not control their content or data handling.</p><h2>Children</h2><p>77 Toolkit is a general-purpose productivity site and is not directed to children under 13. Do not submit personal or sensitive information through public GitHub issues.</p><h2>Your choices and contact</h2><p>You can block or clear cookies through browser settings, manage Google ad personalization through the link above, and avoid using a tool with sensitive material on an untrusted device. For privacy questions, use the contact options on the <a href="/contact/">Contact page</a> without including private tokens, documents, or images in a public report.</p><h2>Changes</h2><p>This policy may change when site features, providers, or legal obligations change. Material updates will be reflected by the date below.</p><p class="static-meta">Effective and last updated: July 16, 2026</p></div>`,
+      body: `<header class="static-hero"><p class="static-eyebrow">Privacy policy</p><h1>Privacy, without vague promises</h1><p>This page explains what stays in your browser, what infrastructure providers can receive, and how advertising cookies may be used.</p></header><div class="static-prose"><h2>Tool inputs and files</h2><p>77 Toolkit's public text, developer, and image utilities are designed to process pasted values and selected files in the active browser tab. The site does not currently operate an account system or a public upload API for these tools, and it does not intentionally transmit tool input to a 77 Toolkit server. Closing or refreshing a page normally clears its working state.</p><h2>Website request data</h2><p>The site is delivered through Cloudflare. Like other hosting and security providers, Cloudflare may process request information such as IP address, browser and device information, requested URL, timestamps, security signals, and diagnostic logs to deliver and protect the service. See <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's Privacy Policy</a>.</p><h2>Google advertising and cookies</h2><p>Pages may include Google AdSense. Third-party vendors, including Google, use cookies or similar technologies to serve and measure ads. Google's use of advertising cookies enables Google and its partners to serve ads based on visits to this site and other sites. Users can manage personalized advertising in <a href="https://adssettings.google.com/">Google Ads Settings</a> and learn more at <a href="https://policies.google.com/technologies/ads">How Google uses information for advertising</a>.</p><p>Where consent is legally required, advertising and storage choices should be presented through a Google-certified consent management message. Availability and exact choices can depend on region and the site's current AdSense configuration.</p><h2>External links</h2><p>Links to GitHub, Google, Cloudflare, and other external sites are governed by those services' own privacy practices. 77 Toolkit does not control their content or data handling.</p><h2>Children</h2><p>77 Toolkit is a general-purpose productivity site and is not directed to children under 13. Do not submit personal or sensitive information through public GitHub issues.</p><h2>Your choices and contact</h2><p>You can block or clear cookies through browser settings, manage Google ad personalization through the link above, and avoid using a tool with sensitive material on an untrusted device. For privacy questions, use the contact options on the <a href="/contact/">Contact page</a> without including private tokens, documents, or images in a public report.</p><h2>Changes</h2><p>This policy may change when site features, providers, or legal obligations change. Material updates will be reflected by the date below.</p><p class="static-meta">Effective and last updated: July 22, 2026</p></div>`,
     }),
     terms: createStaticPage({
       slug: "terms",
       title: "Terms of Use",
       description: "Terms for using 77 Toolkit's free browser-based developer, text, and image utilities.",
-      body: `<header class="static-hero"><p class="static-eyebrow">Terms of use</p><h1>Use the tools, verify the result</h1><p>77 Toolkit provides general-purpose browser utilities. By using the site, you agree to the terms below.</p></header><div class="static-prose"><h2>Permitted use</h2><p>You may use the public tools for lawful personal or commercial work. Do not use the site to violate rights, distribute harmful material, interfere with the service, bypass security controls, or create misleading or fraudulent content.</p><h2>No professional advice</h2><p>Results are informational and do not constitute legal, financial, medical, security, or other professional advice. A formatted value, decoded token, matching hash, passing contrast ratio, or cleaned image does not by itself prove that a wider system is correct, secure, compliant, or accessible.</p><h2>Your responsibility</h2><p>You are responsible for reviewing output, preserving original files, maintaining backups, and confirming that you have permission to process the material you provide. Do not rely on the site as the only copy of important data.</p><h2>Availability and warranties</h2><p>The site is provided on an “as is” and “as available” basis without guarantees of uninterrupted access, error-free output, compatibility, or fitness for a particular purpose. Browser behavior and third-party platform changes can affect results.</p><h2>Limitation of liability</h2><p>To the extent permitted by applicable law, the site operator is not liable for indirect, incidental, special, consequential, or data-loss damages arising from use of the site.</p><h2>Third-party services</h2><p>The site may link to or rely on services such as Cloudflare, GitHub, and Google AdSense. Those services operate under their own terms and policies.</p><h2>Changes and contact</h2><p>These terms may be updated as the service changes. Questions and good-faith problem reports can be submitted through the <a href="/contact/">Contact page</a>.</p><p class="static-meta">Effective and last updated: July 16, 2026</p></div>`,
+      body: `<header class="static-hero"><p class="static-eyebrow">Terms of use</p><h1>Use the tools, verify the result</h1><p>77 Toolkit provides general-purpose browser utilities. By using the site, you agree to the terms below.</p></header><div class="static-prose"><h2>Permitted use</h2><p>You may use the public tools for lawful personal or commercial work. Do not use the site to violate rights, distribute harmful material, interfere with the service, bypass security controls, or create misleading or fraudulent content.</p><h2>No professional advice</h2><p>Results are informational and do not constitute legal, financial, medical, security, or other professional advice. A formatted value, decoded token, matching hash, passing contrast ratio, or cleaned image does not by itself prove that a wider system is correct, secure, compliant, or accessible.</p><h2>Your responsibility</h2><p>You are responsible for reviewing output, preserving original files, maintaining backups, and confirming that you have permission to process the material you provide. Do not rely on the site as the only copy of important data.</p><h2>Availability and warranties</h2><p>The site is provided on an “as is” and “as available” basis without guarantees of uninterrupted access, error-free output, compatibility, or fitness for a particular purpose. Browser behavior and third-party platform changes can affect results.</p><h2>Limitation of liability</h2><p>To the extent permitted by applicable law, the site operator is not liable for indirect, incidental, special, consequential, or data-loss damages arising from use of the site.</p><h2>Third-party services</h2><p>The site may link to or rely on services such as Cloudflare, GitHub, and Google AdSense. Those services operate under their own terms and policies.</p><h2>Changes and contact</h2><p>These terms may be updated as the service changes. Questions and good-faith problem reports can be submitted through the <a href="/contact/">Contact page</a>.</p><p class="static-meta">Effective and last updated: July 22, 2026</p></div>`,
     }),
     contact: createStaticPage({
       slug: "contact",
       title: "Contact",
       description: "Contact 77 Toolkit about bugs, accessibility, privacy, security, or feature suggestions.",
-      body: `<header class="static-hero"><p class="static-eyebrow">Contact</p><h1>Report a problem clearly</h1><p>77 Toolkit is maintained through GitHub. Choose the route below that fits the issue and avoid sharing private material publicly.</p></header><div class="trust-grid"><section class="trust-card"><h2>Bugs and features</h2><p>Open an issue in the <a href="https://github.com/QI-Tony/77toolkit/issues">public issue tracker</a> with the tool URL, browser, expected behavior, and reproducible steps.</p></section><section class="trust-card"><h2>Accessibility</h2><p>Report keyboard, screen-reader, contrast, zoom, or motion barriers through GitHub and label the issue as an accessibility problem.</p></section><section class="trust-card"><h2>Privacy and security</h2><p>Start with the maintainer's <a href="https://github.com/QI-Tony">GitHub profile</a>. Do not publish tokens, personal documents, private images, or exploit details in a public issue.</p></section></div><div class="static-prose"><h2>What makes a useful report</h2><ul><li>The exact page address and tool name</li><li>Your browser and operating system</li><li>The steps that reproduce the issue</li><li>What you expected and what happened instead</li><li>A safe sample that contains no confidential information</li></ul><h2>Response expectations</h2><p>The project does not currently promise a service-level response time. Clear reports that can be reproduced are easier to investigate and prioritize.</p><p class="static-meta">Last updated: July 16, 2026</p></div>`,
+      body: `<header class="static-hero"><p class="static-eyebrow">Contact</p><h1>Report a problem clearly</h1><p>77 Toolkit is maintained through GitHub. Choose the route below that fits the issue and avoid sharing private material publicly.</p></header><div class="trust-grid"><section class="trust-card"><h2>Bugs and features</h2><p>Open an issue in the <a href="https://github.com/QI-Tony/77toolkit/issues">public issue tracker</a> with the tool URL, browser, expected behavior, and reproducible steps.</p></section><section class="trust-card"><h2>Accessibility</h2><p>Report keyboard, screen-reader, contrast, zoom, or motion barriers through GitHub and label the issue as an accessibility problem.</p></section><section class="trust-card"><h2>Privacy and security</h2><p>Start with the maintainer's <a href="https://github.com/QI-Tony">GitHub profile</a>. Do not publish tokens, personal documents, private images, or exploit details in a public issue.</p></section></div><div class="static-prose"><h2>What makes a useful report</h2><ul><li>The exact page address and tool name</li><li>Your browser and operating system</li><li>The steps that reproduce the issue</li><li>What you expected and what happened instead</li><li>A safe sample that contains no confidential information</li></ul><h2>Response expectations</h2><p>The project does not currently promise a service-level response time. Clear reports that can be reproduced are easier to investigate and prioritize.</p><p class="static-meta">Last updated: July 22, 2026</p></div>`,
     }),
   };
+}
+
+function extractReadableText(html) {
+  return html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&(?:[a-z]+|#\d+);/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function countWords(html) {
+  const text = extractReadableText(html);
+  return text ? text.split(" ").length : 0;
+}
+
+async function collectHtmlFiles(directory) {
+  const files = [];
+  const entries = await readdir(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await collectHtmlFiles(entryPath)));
+    else if (entry.name.endsWith(".html")) files.push(entryPath);
+  }
+  return files;
+}
+
+async function validateBuildOutput() {
+  const htmlFiles = await collectHtmlFiles(outputRoot);
+  const missingRoutes = new Set();
+  const catalogSlugs = new Set(toolCatalog.map((tool) => tool.slug));
+  const guideSlugs = new Set(guideCatalog.map((guide) => guide.slug));
+
+  if (catalogSlugs.size !== toolCatalog.length) throw new Error("Duplicate tool slugs found in the catalog.");
+  if (guideSlugs.size !== guideCatalog.length) throw new Error("Duplicate guide slugs found in the guide catalog.");
+  if (new Set(sitemapPaths).size !== sitemapPaths.length) throw new Error("Duplicate sitemap paths found.");
+  for (const slug of Object.keys(toolEditorial)) {
+    if (!catalogSlugs.has(slug)) throw new Error(`Editorial content references unknown tool ${slug}.`);
+  }
+
+  for (const file of htmlFiles) {
+    const html = await readFile(file, "utf8");
+    const relativePath = path.relative(outputRoot, file);
+    const isNotFoundPage = relativePath === "404.html";
+    const adLoaderCount = (html.match(/pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/g) || []).length;
+    const canonicalCount = (html.match(/rel="canonical"/g) || []).length;
+
+    if (!html.includes('href="/favicon.ico"')) throw new Error(`Missing favicon metadata in ${relativePath}.`);
+    if (isNotFoundPage && adLoaderCount !== 0) throw new Error("The 404 page must not load AdSense.");
+    if (!isNotFoundPage && adLoaderCount !== 1) throw new Error(`Expected one AdSense loader in ${relativePath}, found ${adLoaderCount}.`);
+    if (isNotFoundPage && canonicalCount !== 0) throw new Error("The 404 page must not have a canonical URL.");
+    if (!isNotFoundPage && canonicalCount !== 1) throw new Error(`Expected one canonical URL in ${relativePath}, found ${canonicalCount}.`);
+    if (/JSON Doctor|Format Remove/.test(html)) throw new Error(`Legacy product naming remains in ${relativePath}.`);
+
+    for (const match of html.matchAll(/href="(\/[^\"]*)"/g)) {
+      const route = match[1].split(/[?#]/)[0];
+      if (!route || route.startsWith("//")) continue;
+      const localPath = path.join(outputRoot, route.slice(1));
+      const candidate = path.extname(route) ? localPath : path.join(localPath, "index.html");
+      try {
+        await access(candidate);
+      } catch {
+        missingRoutes.add(`${relativePath}: ${route}`);
+      }
+    }
+  }
+
+  if (missingRoutes.size) throw new Error(`Broken internal links:\n${[...missingRoutes].join("\n")}`);
+
+  for (const tool of toolCatalog) {
+    const html = await readFile(path.join(outputRoot, "tools", tool.slug, "index.html"), "utf8");
+    const publisherContent = createPublisherContent(tool);
+    if (!html.includes(publisherContent)) throw new Error(`Publisher content is missing or incomplete for ${tool.slug}.`);
+    const words = countWords(publisherContent);
+    if (words < 300) throw new Error(`${tool.slug} has only ${words} words of publisher content; expected at least 300.`);
+  }
+
+  for (const guide of guideCatalog) {
+    const html = await readFile(path.join(outputRoot, "guides", guide.slug, "index.html"), "utf8");
+    const words = countWords(html);
+    if (words < 450) throw new Error(`${guide.slug} has only ${words} readable words; expected at least 450.`);
+  }
 }
 
 function injectExistingToolContent(html, tool) {
   const headContent = `
     ${createSocialMeta(`${tool.name} — 77 Toolkit`, `${tool.description} Runs locally in your browser.`, `/tools/${tool.slug}/`)}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3812186991635556" crossorigin="anonymous"></script>
+    ${createIconMeta()}
+    ${createAdSenseLoader()}
     <link rel="stylesheet" href="${sharedAssets.content}">
     <script type="application/ld+json">${createToolStructuredData(tool)}</script>`;
   let result = html.replace("</head>", `${headContent}\n  </head>`);
@@ -356,7 +551,8 @@ function createToolPage(tool) {
     <title>${escapeHtml(tool.name)} — 77 Toolkit</title>
     <link rel="canonical" href="https://77toolkit.com/tools/${escapeHtml(tool.slug)}/">
     ${createSocialMeta(`${tool.name} — 77 Toolkit`, `${tool.description} Runs locally in your browser.`, `/tools/${tool.slug}/`)}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3812186991635556" crossorigin="anonymous"></script>
+    ${createIconMeta()}
+    ${createAdSenseLoader()}
     <link rel="stylesheet" href="${sharedAssets.styles}">
     <link rel="stylesheet" href="${sharedAssets.content}">
     <script type="application/ld+json">${createToolStructuredData(tool)}</script>
@@ -414,15 +610,16 @@ const homeIndex = path.join(outputRoot, "index.html");
 const homeHtml = await readFile(homeIndex, "utf8");
 const catalogStart = "<!-- TOOL_CATALOG_START -->";
 const catalogEnd = "<!-- TOOL_CATALOG_END -->";
-if (!homeHtml.includes(catalogStart) || !homeHtml.includes(catalogEnd)) {
-  throw new Error("Home catalog build markers are missing.");
+const guideStart = "<!-- GUIDE_CATALOG_START -->";
+const guideEnd = "<!-- GUIDE_CATALOG_END -->";
+if (!homeHtml.includes(catalogStart) || !homeHtml.includes(catalogEnd) || !homeHtml.includes(guideStart) || !homeHtml.includes(guideEnd)) {
+  throw new Error("Home catalog or guide build markers are missing.");
 }
 await writeFile(
   homeIndex,
-  homeHtml.replace(
-    new RegExp(`${catalogStart}[\\s\\S]*?${catalogEnd}`),
-    `${catalogStart}${createHomeCatalogMarkup()}${catalogEnd}`,
-  ),
+  homeHtml
+    .replace(new RegExp(`${catalogStart}[\\s\\S]*?${catalogEnd}`), `${catalogStart}${createHomeCatalogMarkup()}${catalogEnd}`)
+    .replace(new RegExp(`${guideStart}[\\s\\S]*?${guideEnd}`), `${guideStart}${createHomeGuideMarkup()}${guideEnd}`),
 );
 
 for (const categoryName of Object.keys(categoryContent)) {
@@ -437,6 +634,15 @@ for (const [slug, html] of Object.entries(trustPages)) {
   const pageDirectory = path.join(outputRoot, slug);
   await mkdir(pageDirectory, { recursive: true });
   await writeFile(path.join(pageDirectory, "index.html"), html);
+}
+
+const guideDirectory = path.join(outputRoot, "guides");
+await mkdir(guideDirectory, { recursive: true });
+await writeFile(path.join(guideDirectory, "index.html"), createGuideIndexPage());
+for (const guide of guideCatalog) {
+  const pageDirectory = path.join(guideDirectory, guide.slug);
+  await mkdir(pageDirectory, { recursive: true });
+  await writeFile(path.join(pageDirectory, "index.html"), createGuidePage(guide));
 }
 
 await writeFile(
@@ -457,6 +663,8 @@ await writeFile(
     ...toolCatalog.map((tool) => `/tools/${tool.slug} /tools/${tool.slug}/ 301`),
     ...Object.values(categoryContent).map((category) => `/${category.slug} /${category.slug}/ 301`),
     ...Object.keys(trustPages).map((slug) => `/${slug} /${slug}/ 301`),
+    "/guides /guides/ 301",
+    ...guideCatalog.map((guide) => `/guides/${guide.slug} /guides/${guide.slug}/ 301`),
     "",
   ].join("\n"),
 );
@@ -465,6 +673,8 @@ const sitemapPaths = [
   "/",
   ...Object.values(categoryContent).map((category) => `/${category.slug}/`),
   ...Object.keys(trustPages).map((slug) => `/${slug}/`),
+  "/guides/",
+  ...guideCatalog.map((guide) => `/guides/${guide.slug}/`),
   ...toolCatalog.map((tool) => `/tools/${tool.slug}/`),
 ];
 
@@ -472,7 +682,7 @@ await writeFile(
   path.join(outputRoot, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapPaths.map((sitePath) => `  <url><loc>https://77toolkit.com${sitePath}</loc></url>`).join("\n")}
+${sitemapPaths.map((sitePath) => `  <url><loc>https://77toolkit.com${sitePath}</loc><lastmod>${siteUpdated}</lastmod></url>`).join("\n")}
 </urlset>
 `,
 );
@@ -482,4 +692,6 @@ await writeFile(
   "User-agent: *\nAllow: /\nSitemap: https://77toolkit.com/sitemap.xml\n",
 );
 
-console.log(`\nUnified Pages output created in dist/ with ${toolCatalog.length} tools and ${sitemapPaths.length} indexed pages.`);
+await validateBuildOutput();
+
+console.log(`\nUnified Pages output created in dist/ with ${toolCatalog.length} tools, ${guideCatalog.length} guides, and ${sitemapPaths.length} indexed pages.`);

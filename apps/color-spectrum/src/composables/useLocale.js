@@ -6,7 +6,7 @@ const locale = ref('en')
 const messages = {
   en: {
     // Header
-    title: 'Color Spectrum Analyzer',
+    title: 'Color Spectrum',
     subtitle: 'Upload an image to extract dominant colors and analyze color families',
     reupload: '↩ Re-upload',
     // Upload
@@ -46,7 +46,7 @@ const messages = {
     imgLoadFail: 'Image failed to load, please check that the file is valid.',
     extractFail: 'Color extraction failed, please try again.',
     // Footer
-    footer: 'Color Spectrum Analyzer · All processing runs locally in your browser, no data is uploaded',
+    footer: 'Color Spectrum · All processing runs locally in your browser, no data is uploaded',
     // Family names
     familyNames: {
       red: 'Reds', orange: 'Oranges', yellow: 'Yellows', green: 'Greens',
@@ -56,7 +56,7 @@ const messages = {
   },
   zh: {
     // Header
-    title: '色彩谱系分析仪',
+    title: '色彩谱系',
     subtitle: '上传图片，即时提取主色、分析颜色家族',
     reupload: '↩ 重新上传',
     // Upload
@@ -96,7 +96,7 @@ const messages = {
     imgLoadFail: '图片加载失败，请检查文件是否损坏。',
     extractFail: '颜色提取失败，请重试。',
     // Footer
-    footer: '色彩谱系分析仪 · 所有处理在本地浏览器完成，不上传任何数据',
+    footer: '色彩谱系 · 所有处理在本地浏览器完成，不上传任何数据',
     // Family names
     familyNames: {
       red: '红色系', orange: '橙色系', yellow: '黄色系', green: '绿色系',

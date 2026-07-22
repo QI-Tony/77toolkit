@@ -7,8 +7,11 @@
       name="description"
       content="77 Toolkit is a growing collection of lightweight browser-based utilities for everyday digital work."
     >
-    <title>77 Toolkit</title>
+    <title>77 Toolkit — Local-first Browser Tools</title>
     <link rel="canonical" href="https://77toolkit.com/">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" href="/favicon-64.png" sizes="64x64">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="77 Toolkit">
     <meta property="og:title" content="77 Toolkit — Local-first browser utilities">
@@ -41,7 +44,7 @@
         <a class="brand" href="/" aria-label="77 Toolkit home">
           <img
             class="brand-logo"
-            src="77toolkit-logo.png"
+            src="/favicon-64.png"
             alt=""
             width="40"
             height="40"
@@ -49,9 +52,11 @@
           <span class="brand-name">77 Toolkit</span>
         </a>
         <div class="nav-links">
-          <a href="#tools">Tools</a>
-          <a href="/about/">About</a>
-          <a href="https://github.com/QI-Tony/77toolkit" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="#tools">All tools</a>
+          <a href="/developer/">Developer</a>
+          <a href="/text/">Text</a>
+          <a href="/image/">Image</a>
+          <a href="/guides/">Guides</a>
         </div>
       </nav>
     </header>
@@ -87,6 +92,18 @@
         <p class="empty-state" id="empty-state" hidden>No tools match that search.</p>
       </section>
 
+      <section class="guides-section" aria-labelledby="guides-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Original editorial content</p>
+            <h2 id="guides-title">Understand the work behind the tool</h2>
+          </div>
+          <p>Practical explanations, review steps, and limitations for common developer and image workflows.</p>
+        </div>
+        <div class="home-guide-grid"><!-- GUIDE_CATALOG_START --><!-- GUIDE_CATALOG_END --></div>
+        <a class="guides-all-link" href="/guides/">Browse all practical guides <span aria-hidden="true">→</span></a>
+      </section>
+
       <section class="about-section" id="about" aria-labelledby="about-title">
         <div class="section-heading">
           <h2 id="about-title">About 77 Toolkit</h2>
@@ -106,10 +123,12 @@
         <p>Built for simple, useful web tools.</p>
       </div>
       <nav class="footer-links" aria-label="Site information">
+        <a href="/guides/">Guides</a>
         <a href="/about/">About</a>
         <a href="/privacy/">Privacy</a>
         <a href="/terms/">Terms</a>
         <a href="/contact/">Contact</a>
+        <a href="https://github.com/QI-Tony/77toolkit" rel="noreferrer">GitHub</a>
       </nav>
     </footer>
 
