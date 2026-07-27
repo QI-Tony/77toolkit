@@ -6,7 +6,7 @@ repository:
 - static, crawlable homepage links for every tool;
 - task-specific scenarios, review checklists, alternatives, privacy notes,
   examples, limitations, and FAQs for every tool page;
-- eight original long-form guides with primary references and related tools;
+- ten original long-form guides with primary references and related tools;
 - real About, Privacy, Terms, and Contact pages;
 - category landing pages for Developer, Text, and Image tools;
 - a real `404.html`, canonical URLs, structured data, `robots.txt`, `ads.txt`,
