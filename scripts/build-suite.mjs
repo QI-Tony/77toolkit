@@ -11,7 +11,7 @@ import { guideCatalog } from "../apps/browser-tools/guides.mjs";
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputRoot = path.join(repositoryRoot, "dist");
 const sharedSourceRoot = path.join(repositoryRoot, "apps/browser-tools/shared");
-const siteUpdated = "2026-07-22";
+const siteUpdated = "2026-07-27";
 
 const sharedAssets = {
   app: "/tools/_shared/app.js",
