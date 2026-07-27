@@ -1,5 +1,125 @@
 export const guideCatalog = [
   {
+    slug: "tmux-permission-denied",
+    title: "Why a command works outside tmux but gets permission denied inside",
+    description: "A process-focused workflow for comparing users, groups, environment variables, path permissions, ACLs, and mount context before changing access.",
+    kicker: "Linux diagnostics",
+    readingTime: "9 min read",
+    published: "2026-07-27",
+    updated: "2026-07-27",
+    relatedTools: [],
+    sections: [
+      {
+        heading: "tmux is persistent process context, not a permission layer",
+        paragraphs: [
+          "tmux does not normally invent a second Linux user or apply its own file mode rules. It runs a long-lived server process, and shells inside its windows descend from that server. Those child processes inherit credentials and other context from their parents. A shell opened by a fresh SSH login may therefore differ from a shell created by a tmux server that has been alive for days, even though both prompts display the same username.",
+          "Treat the difference as evidence that the two processes are not operating with identical context. Avoid starting with chmod, chown, sudo, or a recursive permission change. Those commands can hide the original cause, broaden access unnecessarily, and damage ownership or executable bits across a large data directory.",
+        ],
+      },
+      {
+        heading: "Compare the two shells before changing anything",
+        paragraphs: [
+          "Run the same inspection commands once in the working shell and once in tmux. Start with id, umask, pwd, and a filtered environment comparison. Check the exact target with namei -l /path/to/file, because Linux requires search permission on every directory in the path, not only read or write permission on the final file. Use getfacl when access control lists may supplement the ordinary owner, group, and mode bits.",
+          "Record the exact failing operation and error. Reading a file, listing its parent directory, creating a sibling file, renaming across mounts, and opening a Docker bind mount exercise different checks. Test with a harmless command such as stat or test -r before retrying a script that writes or deletes data.",
+        ],
+        bullets: [
+          "Identity: id; id -G; cat /proc/$$/status | grep '^Groups:'.",
+          "Path traversal: namei -l /absolute/path/to/target.",
+          "ACLs: getfacl -p /absolute/path/to/target and its parent directories.",
+          "Mount context: findmnt -T /absolute/path/to/target; readlink /proc/$$/ns/mnt.",
+          "Environment: compare env | sort output, especially HOME, PATH, SSH_AUTH_SOCK, XDG_RUNTIME_DIR, and application-specific variables.",
+        ],
+      },
+      {
+        heading: "Stale supplementary groups are a common tmux-specific cause",
+        paragraphs: [
+          "Linux processes carry a set of supplementary group IDs. A child inherits that set from its parent, and executing a new program preserves it. If an administrator adds your account to a storage, Docker, or project group after the tmux server starts, a new login can receive the new group while the old tmux server and every shell it creates continue with the earlier group list.",
+          "Compare id -G inside and outside tmux. If the lists differ, finish or checkpoint important jobs before replacing the stale server. A separate test server, for example tmux -L permission-test new, can confirm the diagnosis without touching existing sessions. Logging out fully and starting a new tmux server refreshes login credentials; tmux kill-server also does so, but it terminates every session and must not be used while valuable jobs are running.",
+        ],
+      },
+      {
+        heading: "Environment, ACL, and namespace differences can look like file permissions",
+        paragraphs: [
+          "tmux maintains server and session environments for processes it starts. Reattaching from a new SSH connection can update selected variables, but an already-running shell keeps the environment it received when it started. A stale SSH_AUTH_SOCK may cause an authentication failure, a different HOME may select another configuration file, and a missing XDG_RUNTIME_DIR may redirect an application to an inaccessible location. These failures are often reported loosely as permission problems even when Unix mode bits are not the deciding factor.",
+          "Also compare ACLs and mount namespaces. Removable disks, network shares, container bind mounts, systemd services, and sandboxed launchers can expose the same pathname through different mounts or identity mappings. findmnt and the namespace link under /proc reveal whether the two shells see the same filesystem context. If the namespace differs, fix how tmux is launched or where the filesystem is mounted instead of weakening permissions on the data.",
+        ],
+      },
+      {
+        heading: "Apply the narrowest durable fix",
+        paragraphs: [
+          "For a stale group list, start a fresh login and tmux server after protecting active work. For a real ownership problem, assign the intended owner or shared group and grant only the required directory search, read, or write access. For collaborative directories, a deliberate group plus setgid directory policy or a documented ACL is usually clearer than world-writable modes.",
+          "For stale variables, update the relevant tmux environment and open a new pane or shell; existing processes cannot have their complete environment rewritten from outside. For a mount or container mismatch, correct the mount, namespace, or user mapping. Re-run the original read-only inspection after the change so the fix is explained by a specific difference rather than by chmod 777.",
+        ],
+      },
+    ],
+    takeaway: "When tmux and a fresh shell disagree, compare the processes' effective context first; fix the stale group, environment, ACL, path, or namespace instead of broadening permissions blindly.",
+    resources: [
+      { label: "tmux Wiki: the server and clients", url: "https://github.com/tmux/tmux/wiki/Getting-Started#the-tmux-server-and-clients" },
+      { label: "tmux(1) manual", url: "https://man7.org/linux/man-pages/man1/tmux.1.html" },
+      { label: "Linux credentials(7)", url: "https://man7.org/linux/man-pages/man7/credentials.7.html" },
+      { label: "Linux access(2): directory search permission", url: "https://man7.org/linux/man-pages/man2/access.2.html" },
+    ],
+  },
+  {
+    slug: "github-wrong-commit-author",
+    title: "Why GitHub shows the wrong commit author and how to fix it",
+    description: "Understand author, committer, and pusher identities; diagnose email-based attribution; and configure local or automated commits safely.",
+    kicker: "Git and GitHub",
+    readingTime: "8 min read",
+    published: "2026-07-27",
+    updated: "2026-07-27",
+    relatedTools: ["hash-generator"],
+    sections: [
+      {
+        heading: "Repository access and commit attribution are separate",
+        paragraphs: [
+          "A successful push proves that the credential used for the network operation had permission to update the repository. It does not determine the author shown for each commit. A Git commit records an author name and email as well as a committer name and email. Hosting platforms can separately record who pushed, merged, or created a change through an app.",
+          "GitHub links a commit to an account by matching the email stored in the commit header to an email associated with that account. The visible Git user.name is a label, not a GitHub login lookup. Changing only the name to match a username therefore does not repair attribution when the email is missing, invalid, unverified, or connected to another account.",
+        ],
+      },
+      {
+        heading: "Inspect the commit and the configuration source",
+        paragraphs: [
+          "Read the stored identity from the commit itself before editing configuration. The command git show -s --format='Author: %an <%ae>%nCommitter: %cn <%ce>' HEAD displays both roles for the latest commit. Replace HEAD with a commit hash when investigating older history. On GitHub, adding .patch to a commit URL also exposes the author line in a text patch.",
+          "Next run git config --show-origin --get-regexp '^user\\.(name|email)$'. The --show-origin output matters because repository-level configuration overrides global configuration, and a worktree or included config can add another layer. Automation may also set GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, GIT_COMMITTER_NAME, or GIT_COMMITTER_EMAIL for one command, overriding the values you expected Git to read.",
+        ],
+        bullets: [
+          "Check both author and committer; they may intentionally differ after rebasing or applying a patch.",
+          "Check the exact machine, container, cloud workspace, or CI runner that created the commit.",
+          "Confirm the email appears and is verified under the intended GitHub account.",
+          "Do not infer authorship from the repository owner, remote URL, SSH key, or personal access token.",
+        ],
+      },
+      {
+        heading: "Configure future commits with a verified or private address",
+        paragraphs: [
+          "Set user.name to the human-readable name you want stored in new commits. Set user.email to a verified address on the intended GitHub account or to the account's GitHub-provided noreply address. Use git config user.email inside one repository when identities differ by project, or git config --global user.email when the same identity should be the default on that computer.",
+          "If email privacy matters, copy the exact ID-based noreply address from GitHub Settings under Emails. Do not invent the numeric prefix or reuse another account's address. The ID-based form remains associated more reliably if the username later changes. Create a small test commit and inspect it locally before pushing a large automated change.",
+        ],
+      },
+      {
+        heading: "Make Codex, CI, and other automation explicit",
+        paragraphs: [
+          "A fresh cloud workspace or container may not contain your usual global Git configuration. Before an automated agent commits, have the workflow set a repository-scoped name and verified or noreply email, then print the resolved values with --show-origin. After the commit, inspect the stored author and committer fields rather than assuming the push token supplied them.",
+          "Choose the identity policy deliberately. Some teams use a service account or bot for machine-generated commits; others attribute the human requester and add a co-author or automation note. Whichever policy you choose, avoid borrowing an email merely to make a profile appear. Commit metadata should remain an honest description of who authored and committed the change.",
+        ],
+      },
+      {
+        heading: "Repair old history only when the benefit justifies it",
+        paragraphs: [
+          "If an old commit used an email you own, adding and verifying that exact address on the correct GitHub account may restore association without changing repository history. This is the least disruptive option. It is not appropriate when the address belongs to someone else or would expose an address you intend to keep private.",
+          "Rewriting commits can replace author or committer metadata, but every rewritten commit receives a new hash. Descendant hashes change as well, signatures may become invalid, open pull requests can become confusing, and collaborators must reconcile their clones after a force push. For a shared or deployed branch, preserving history and fixing future commits is often safer than rewriting solely for cosmetic attribution.",
+        ],
+      },
+    ],
+    takeaway: "GitHub attribution follows the email stored in each commit, while push authorization follows the network credential; inspect and configure both as separate identities.",
+    resources: [
+      { label: "GitHub Docs: Why are my commits linked to the wrong user?", url: "https://docs.github.com/articles/why-are-my-commits-linked-to-the-wrong-user" },
+      { label: "GitHub Docs: Setting your commit email address", url: "https://docs.github.com/en/account-and-profile/how-tos/email-preferences/setting-your-commit-email-address" },
+      { label: "GitHub Docs: Email addresses reference", url: "https://docs.github.com/en/account-and-profile/reference/email-addresses-reference" },
+    ],
+  },
+  {
     slug: "repair-invalid-json",
     title: "How to repair invalid JSON without changing its meaning",
     description: "A careful workflow for fixing JSON syntax, reviewing inferred changes, and validating the result before it returns to an application.",
