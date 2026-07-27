@@ -16,8 +16,8 @@ services.
 | `workers/api` | `api.77toolkit.com` | Optional shared backend for future tools |
 
 The public catalog currently includes 19 tools across Developer, Text, and
-Image categories, plus eight original workflow guides. The production build
-creates 36 indexable pages with consistent metadata, navigation, AdSense
+Image categories, plus ten original workflow guides. The production build
+creates 38 indexable pages with consistent metadata, navigation, AdSense
 coverage, favicons, internal links, and sitemap dates. The original three apps
 keep their independent codebases; the newer small utilities share one
 accessible interface and browser runtime.
