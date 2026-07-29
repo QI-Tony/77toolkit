@@ -6,9 +6,10 @@ repository:
 - static, crawlable homepage links for every tool;
 - task-specific scenarios, review checklists, alternatives, privacy notes,
   examples, limitations, and FAQs for every tool page;
-- ten original long-form guides with primary references and related tools;
-- real About, Privacy, Terms, and Contact pages;
-- category landing pages for Developer, Text, and Image tools;
+- eleven original long-form guides with primary references and related tools;
+- real About, Editorial Policy, Accessibility, Privacy, Terms, Contact, and
+  human-readable Site Map pages;
+- category landing pages for Developer, Text, Image, and Web tools;
 - a real `404.html`, canonical URLs, structured data, `robots.txt`, `ads.txt`,
   favicons, dated sitemap entries, and a complete sitemap;
 - one AdSense loader on every indexable HTML page and no loader on the noindex
@@ -27,9 +28,13 @@ These steps cannot be completed in source code:
    `pub-3812186991635556`.
 3. In Google Search Console, verify the domain property and submit
    `https://77toolkit.com/sitemap.xml`.
-4. Inspect the homepage, all three category pages, the four information pages,
-   and representative tool pages. Resolve indexing or mobile usability issues.
-5. Reapply only after the deployed pages are accessible and Search Console has
+4. Inspect the homepage, all four category pages, all information pages,
+   every guide, and representative tool pages. Resolve indexing, crawl, or
+   mobile usability issues.
+5. Configure permanent `301` redirects from the three retired tool subdomains
+   to their canonical `/tools/.../` paths and verify that none still serves a
+   duplicate `200` page.
+6. Reapply only after the deployed pages are accessible and Search Console has
    crawled the new structure.
 
 ## Content rules for future tools

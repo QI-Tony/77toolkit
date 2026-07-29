@@ -151,6 +151,46 @@ export const toolCatalog = [
     description: "Strip EXIF and other metadata by safely re-encoding an image locally.",
     implementation: "shared",
   },
+  {
+    slug: "url-parser",
+    name: "URL Parser",
+    category: "Web",
+    tags: ["URL", "Query", "Inspect"],
+    description: "Break an absolute URL into its origin, path, query parameters, and fragment.",
+    implementation: "shared",
+  },
+  {
+    slug: "url-encoder",
+    name: "URL Encoder",
+    category: "Web",
+    tags: ["Encode", "Decode", "Percent"],
+    description: "Encode or decode URL components without sending addresses to a remote service.",
+    implementation: "shared",
+  },
+  {
+    slug: "csv-json-converter",
+    name: "CSV ↔ JSON Converter",
+    category: "Web",
+    tags: ["CSV", "JSON", "Data"],
+    description: "Convert quoted CSV records and JSON object arrays in either direction locally.",
+    implementation: "shared",
+  },
+  {
+    slug: "html-entities",
+    name: "HTML Entity Encoder",
+    category: "Web",
+    tags: ["HTML", "Entities", "Escape"],
+    description: "Encode HTML-sensitive characters or decode named and numeric character references.",
+    implementation: "shared",
+  },
+  {
+    slug: "css-unit-converter",
+    name: "CSS Unit Converter",
+    category: "Web",
+    tags: ["CSS", "rem", "Viewport"],
+    description: "Compare px, rem, em, vw, and vh values using explicit layout assumptions.",
+    implementation: "shared",
+  },
 ];
 
-export const categoryOrder = ["Developer", "Text", "Image"];
+export const categoryOrder = ["Developer", "Text", "Image", "Web"];

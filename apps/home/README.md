@@ -15,7 +15,7 @@ focused browser tools and presents them as a quiet utility workspace.
 
 ## Published content
 
-- 19 tools under `https://77toolkit.com/tools/<tool>/`
-- Developer, Text, and Image category pages
-- Eight practical guides under `https://77toolkit.com/guides/`
-- About, Privacy, Terms, and Contact pages
+- 24 tools under `https://77toolkit.com/tools/<tool>/`
+- Developer, Text, Image, and Web category pages
+- Eleven practical guides under `https://77toolkit.com/guides/`
+- About, Editorial Policy, Accessibility, Privacy, Terms, Contact, and Site Map pages

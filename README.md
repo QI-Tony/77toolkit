@@ -12,12 +12,12 @@ services.
 | `apps/color-spectrum` | `77toolkit.com/tools/color-spectrum/` | Extract and analyze colors from images |
 | `apps/json-fix` | `77toolkit.com/tools/json-fix/` | Repair and format malformed JSON |
 | `apps/text-clean` | `77toolkit.com/tools/text-clean/` | Remove formatting from copied text |
-| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 16 focused tools |
+| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 21 focused tools |
 | `workers/api` | `api.77toolkit.com` | Optional shared backend for future tools |
 
-The public catalog currently includes 19 tools across Developer, Text, and
-Image categories, plus ten original workflow guides. The production build
-creates 38 indexable pages with consistent metadata, navigation, AdSense
+The public catalog currently includes 24 tools across Developer, Text, Image,
+and Web categories, plus eleven original workflow guides. The production build
+creates 48 indexable pages with consistent metadata, navigation, AdSense
 coverage, favicons, internal links, and sitemap dates. The original three apps
 keep their independent codebases; the newer small utilities share one
 accessible interface and browser runtime.

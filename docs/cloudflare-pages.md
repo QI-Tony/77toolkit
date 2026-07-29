@@ -12,13 +12,17 @@ dist/
 ├── developer/index.html
 ├── text/index.html
 ├── image/index.html
+├── web/index.html
+├── editorial-policy/index.html
+├── accessibility/index.html
+├── site-map/index.html
 └── tools/
     ├── _shared/
     ├── color-spectrum/index.html
     ├── image-compressor/index.html
     ├── json-fix/index.html
     ├── text-clean/index.html
-    └── ... 15 more tool routes
+    └── ... 20 more tool routes
 ```
 
 Use these Pages settings:

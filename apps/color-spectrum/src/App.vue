@@ -140,6 +140,7 @@ function handleDownloadPNG() {
           <a class="home-link category-link" href="/developer/">Developer</a>
           <a class="home-link category-link" href="/text/">Text</a>
           <a class="home-link category-link" href="/image/">Image</a>
+          <a class="home-link category-link" href="/web/">Web</a>
           <a class="home-link" href="/guides/">Guides</a>
           <button class="btn-lang" @click="toggleLocale" :title="locale === 'en' ? 'Switch to Chinese' : '切换为英文'">
             {{ locale === 'en' ? '中文' : 'EN' }}

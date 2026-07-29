@@ -223,6 +223,7 @@ function loadSample() {
           <a class="btn-secondary hidden md:inline-flex" href="/developer/">Developer</a>
           <a class="btn-secondary hidden md:inline-flex" href="/text/">Text</a>
           <a class="btn-secondary hidden md:inline-flex" href="/image/">Image</a>
+          <a class="btn-secondary hidden md:inline-flex" href="/web/">Web</a>
           <a class="btn-secondary" href="/guides/">Guides</a>
           <button class="btn-secondary" type="button" @click="toggleLanguage">
             <Languages class="h-4 w-4" />

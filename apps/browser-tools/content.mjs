@@ -41,6 +41,20 @@ export const categoryContent = {
       "Clear warnings when re-encoding changes file properties",
     ],
   },
+  Web: {
+    slug: "web",
+    title: "Web Tools",
+    description: "Focused browser utilities for URLs, tabular data, HTML text, and responsive CSS measurements.",
+    intro: [
+      "Web work often fails at boundaries: an encoded query value is decoded twice, a CSV field contains an unexpected comma, HTML text is inserted without escaping, or a responsive measurement is calculated from the wrong viewport. This collection makes those assumptions visible before the result moves into a site or application.",
+      "Each utility runs locally and keeps source and result close together for review. The tools follow browser standards, but production code should still validate untrusted input, document encoding rules, and test output in the environment that will consume it.",
+    ],
+    principles: [
+      "Standards-based parsing with visible assumptions",
+      "Input and output shown together for manual review",
+      "No remote URL fetching or uploaded data",
+    ],
+  },
 };
 
 export const toolContent = {
@@ -255,6 +269,61 @@ export const toolContent = {
     faqs: [
       { question: "Does this guarantee anonymous sharing?", answer: "No. It removes embedded metadata, but the image content, filename, account, and sharing service can still reveal information." },
       { question: "Why can file size change?", answer: "The result is newly encoded, so compression settings and container overhead differ from the original." },
+    ],
+  },
+  "url-parser": {
+    intro: "URL Parser separates an absolute web address into the fields defined by the browser URL standard. It is useful when a redirect, callback, tracking link, or copied request contains a path, fragment, credentials, port, or repeated query parameters that are difficult to inspect as one line.",
+    steps: ["Paste a complete URL including its scheme.", "Parse the address and inspect each structural field and decoded query entry.", "Copy only the component you need, then confirm that rebuilding or normalizing the address did not change its intended destination."],
+    example: { input: "https://example.com:8443/search?q=local+tools&q=privacy#results", output: "Host example.com · port 8443 · two q values · fragment results" },
+    howItWorks: "The tool uses the browser URL implementation, which applies standard parsing, resolves percent-encoded sequences where appropriate, and preserves repeated query entries through URLSearchParams. It never visits or checks the destination.",
+    limitations: ["A syntactically valid URL is not proof that a host is safe, reachable, or owned by the expected organization.", "Normalization can change visual spelling, default ports, dot segments, and Unicode host presentation."],
+    faqs: [
+      { question: "Does parsing open the website?", answer: "No. The address is interpreted locally and no request is sent to its host." },
+      { question: "Why do plus signs become spaces in query values?", answer: "URLSearchParams follows form-style query parsing, where a plus sign commonly represents a space. A literal plus should be percent encoded." },
+    ],
+  },
+  "url-encoder": {
+    intro: "URL Encoder applies percent encoding to either one component or a complete URI and can reverse valid encoded text. It helps distinguish a query value from a full address, which matters because separators such as slash, question mark, ampersand, equals, and hash have structural meaning.",
+    steps: ["Choose component mode for a single value or full-URI mode for an already structured address.", "Encode or decode the text.", "Review every separator before inserting the result into a link, redirect, request, or configuration file."],
+    example: { input: "Component: reports/July & August", output: "reports%2FJuly%20%26%20August" },
+    howItWorks: "Component mode uses the JavaScript encodeURIComponent and decodeURIComponent algorithms. Full-URI mode uses encodeURI and decodeURI, which intentionally preserve characters that delimit URL structure.",
+    limitations: ["Decoding malformed percent sequences raises an error instead of guessing missing bytes.", "Percent encoding is a transport representation, not encryption, access control, or protection from malicious destinations."],
+    faqs: [
+      { question: "Should I encode a whole URL as one component?", answer: "Only when the entire URL is itself a parameter value. Otherwise full-URI mode preserves the separators that give the address structure." },
+      { question: "Why was a slash encoded in component mode?", answer: "A slash is structural inside a URL path, so component encoding escapes it when the slash is intended to be ordinary data." },
+    ],
+  },
+  "csv-json-converter": {
+    intro: "CSV ↔ JSON Converter moves small tabular datasets between delimited rows and arrays of objects. It supports quoted fields, embedded delimiters, escaped quotes, line breaks inside quoted values, and a selectable comma, semicolon, or tab delimiter.",
+    steps: ["Choose the delimiter used by the source data.", "Convert CSV with a header row to JSON, or provide a JSON array of flat objects to create CSV.", "Review column names, empty values, numeric-looking text, quoting, and row counts before using the result."],
+    example: { input: "name,note\nAda,\"local, private\"", output: "[{\"name\":\"Ada\",\"note\":\"local, private\"}]" },
+    howItWorks: "A stateful parser reads quoted and unquoted CSV fields without splitting blindly on commas. CSV values remain strings because the format does not carry reliable type metadata. JSON-to-CSV collects object keys and quotes fields when required.",
+    limitations: ["Nested objects and arrays are serialized as JSON text rather than expanded into multiple columns.", "Dialect details such as comments, locale-specific numbers, character encodings, and spreadsheet formulas require destination-specific review."],
+    faqs: [
+      { question: "Will numbers become JavaScript numbers automatically?", answer: "No. CSV does not reliably distinguish identifiers, dates, numbers, and numeric-looking text, so imported values remain strings." },
+      { question: "Can a quoted field contain a newline?", answer: "Yes. A newline inside matching double quotes is retained as part of that field." },
+    ],
+  },
+  "html-entities": {
+    intro: "HTML Entity Encoder converts HTML-sensitive characters into character references and decodes named or numeric references back to text. It is intended for inspecting snippets, preparing literal examples, and understanding why text appears differently when interpreted as markup.",
+    steps: ["Paste ordinary text to encode or entity text to decode.", "Choose the matching action and compare the source with the result.", "Use a context-aware template or sanitizer in production rather than treating one escaping operation as universal protection."],
+    example: { input: "<strong>Tools & privacy</strong>", output: "&lt;strong&gt;Tools &amp; privacy&lt;/strong&gt;" },
+    howItWorks: "Encoding replaces ampersand, angle brackets, quotation marks, and apostrophes with explicit references. Decoding delegates named and numeric references to the browser's HTML parser, then reads the resulting text rather than executing it as page markup.",
+    limitations: ["HTML text, attribute, URL, CSS, and JavaScript contexts require different defenses.", "Decoding untrusted content does not make it safe to insert with innerHTML or execute in a document."],
+    faqs: [
+      { question: "Is entity encoding the same as sanitizing HTML?", answer: "No. Encoding can make text literal in a specific HTML context; sanitizing selectively permits safe markup and requires a dedicated, maintained policy." },
+      { question: "Will decoding run scripts?", answer: "The tool returns decoded characters as text and does not inject them into the page as executable markup." },
+    ],
+  },
+  "css-unit-converter": {
+    intro: "CSS Unit Converter compares px, rem, em, vw, and vh values using explicit root font, element font, and viewport dimensions. It is useful for translating design measurements, checking responsive assumptions, and documenting how a computed size was derived.",
+    steps: ["Enter a value and select its source unit.", "Set the root font size, current element font size, viewport width, and viewport height that apply to the design.", "Compare the equivalent values and verify them in the actual component at target zoom levels."],
+    example: { input: "24 px with 16 px root font and 1440 × 900 viewport", output: "1.5 rem · 1.667 vw · 2.667 vh" },
+    howItWorks: "Every source measurement is first converted to CSS pixels from the supplied assumptions. The pixel value is then divided by the relevant root, element, or viewport basis to calculate the other units.",
+    limitations: ["Computed CSS can also depend on nesting, zoom, writing mode, container queries, font metrics, and browser rounding.", "Changing a value to rem or vw does not automatically make a layout accessible or responsive."],
+    faqs: [
+      { question: "What is the difference between rem and em?", answer: "rem is based on the root element's font size, while em is based on the current element's applicable font size for most length properties." },
+      { question: "Why does the vw result change between devices?", answer: "One vw is one percent of the viewport width, so the same vw value represents a different pixel size when the viewport changes." },
     ],
   },
 };

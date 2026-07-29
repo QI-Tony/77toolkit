@@ -541,6 +541,72 @@
   font-size: 0.78rem;
 }
 
+.guide-meta a {
+  color: #126b63;
+  font-weight: 680;
+  text-underline-offset: 3px;
+}
+
+.static-hero a {
+  color: #0e625b;
+  text-underline-offset: 3px;
+}
+
+.site-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.site-map-section {
+  border: 1px solid #dbe2e8;
+  border-radius: 11px;
+  background: #fff;
+  padding: 20px;
+}
+
+.site-map-section--wide {
+  grid-column: 1 / -1;
+}
+
+.site-map-section h2 {
+  margin: 0 0 12px;
+  font-size: 1.12rem;
+}
+
+.site-map-section h2 a,
+.site-map-section li > a {
+  color: #0e625b;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.site-map-section h2 a:hover,
+.site-map-section h2 a:focus-visible,
+.site-map-section li > a:hover,
+.site-map-section li > a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-map-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-map-section li {
+  border-top: 1px solid #e5eaee;
+  padding: 12px 0;
+}
+
+.site-map-section li span {
+  display: block;
+  margin-top: 4px;
+  color: #667382;
+  font-size: 0.84rem;
+}
+
 .guide-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 280px;
@@ -652,8 +718,13 @@
   .category-tool-grid,
   .trust-grid,
   .guide-grid,
+  .site-map-grid,
   .guide-layout {
     grid-template-columns: 1fr;
+  }
+
+  .site-map-section--wide {
+    grid-column: auto;
   }
 
   .guide-sidebar {

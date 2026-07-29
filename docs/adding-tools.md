@@ -50,6 +50,13 @@ private, inexpensive to host, and require little maintenance.
 - Color Contrast Checker
 - Image Metadata Remover
 
+### Web
+
+- URL Parser and URL Encoder
+- CSV ↔ JSON Converter
+- HTML Entity Encoder
+- CSS Unit Converter
+
 Tools that need secret API keys, cross-origin fetching, accounts, shared saved
 data, or long-running processing should use `workers/api` instead of calling a
 third-party service directly from the browser.

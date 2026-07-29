@@ -466,4 +466,59 @@ export const guideCatalog = [
       { label: "OWASP: Regular expression Denial of Service", url: "https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS" },
     ],
   },
+  {
+    slug: "url-encoding-and-query-parameters",
+    title: "URL encoding without broken query parameters",
+    description: "Understand URL structure, component encoding, repeated query keys, plus signs, Unicode hosts, and the difference between parsing an address and trusting it.",
+    kicker: "Web addresses",
+    readingTime: "8 min read",
+    published: "2026-07-29",
+    updated: "2026-07-29",
+    relatedTools: ["url-parser", "url-encoder", "html-entities"],
+    sections: [
+      {
+        heading: "A URL is structured data, not one undifferentiated string",
+        paragraphs: [
+          "A web address can contain a scheme, username, password, hostname, port, path, query, and fragment. Several punctuation characters separate those regions. A question mark starts the query, an ampersand normally separates query entries, an equals sign separates a key from a value, and a hash starts the fragment. The same character may be ordinary data only after it has been encoded for the component where it appears.",
+          "Production code should construct and inspect URLs with the platform URL and URLSearchParams APIs rather than concatenating fragments by hand. Those APIs make structural intent visible. A user value can be assigned as one parameter without accidentally becoming a second parameter, and repeated keys can be represented without inventing a comma-separated convention that the receiving application may not understand.",
+        ],
+      },
+      {
+        heading: "Encode components at the boundary where they become data",
+        paragraphs: [
+          "Component encoding and full-URI encoding deliberately preserve different characters. A complete URL needs its scheme colon, path slashes, query question mark, and parameter separators. One query value does not. If a callback URL is nested inside a return_to parameter, the inner URL should be treated as the value of that parameter, while the outer URL keeps control of the surrounding structure.",
+          "Double encoding happens when an already encoded value is encoded again. A percent sign becomes percent-25, so one decoding pass leaves another encoded sequence behind. This can produce broken links, mismatched signatures, routing inconsistencies, and security checks that interpret a value at a different layer from the component that later uses it. Record which layer owns encoding and decode only at the corresponding boundary.",
+        ],
+        bullets: ["Build structure with URL APIs.", "Encode user-controlled values as components.", "Do not pre-encode values before assigning them to URLSearchParams.", "Test a complete round trip with Unicode and separator characters."],
+      },
+      {
+        heading: "Query strings have dialect details that must be explicit",
+        paragraphs: [
+          "In form-style query parsing, a plus sign represents a space. A literal plus should therefore appear as percent-2B. This surprises developers working with phone numbers, mathematical expressions, Base64, and timezone offsets. The safest approach is to let URLSearchParams serialize values instead of replacing spaces and punctuation manually.",
+          "Repeated keys are valid and their order can matter to an application. The address ?tag=web&tag=privacy contains two tag values, not necessarily one comma-separated value. Empty values and missing values can also be distinct in a receiving framework. Document the expected representation and test the exact server or browser library that will parse it.",
+        ],
+      },
+      {
+        heading: "Valid syntax does not establish safety or ownership",
+        paragraphs: [
+          "A parser can tell you which hostname a URL contains, but it cannot prove that the destination is legitimate. Attackers use misleading subdomains, Unicode lookalikes, embedded credentials, encoded punctuation, and long paths to make an address look familiar at a glance. Read hostnames from right to left, identify the registrable domain, and treat unexpected credentials or non-default ports as reasons for further investigation.",
+          "Parsing a URL should not fetch it. Following an untrusted address can disclose an IP address, trigger tracking, reach an internal service, or begin an authentication flow. Use a controlled network inspection environment when redirects, certificates, headers, DNS, or final destination behavior must be observed.",
+        ],
+      },
+      {
+        heading: "Create a reproducible URL test set",
+        paragraphs: [
+          "A useful test set includes spaces, literal plus signs, percent signs, ampersands, equals signs, slashes inside values, fragments, empty values, repeated keys, non-ASCII text, and a nested URL. Write down both the human value and the expected serialized address. Tests should assert the parsed values after a round trip rather than comparing only a visually formatted string.",
+          "Security-sensitive applications also need a normalization policy. Decide whether default ports, trailing dots, dot segments, mixed case, and Unicode hostnames are accepted before authorization or signature checks. Apply the same policy in every layer that compares, logs, redirects, or fetches the address.",
+        ],
+        bullets: ["Test literal plus and percent characters.", "Include repeated and empty parameters.", "Compare parsed values after serialization.", "Keep parsing, validation, authorization, and fetching as separate decisions."],
+      },
+    ],
+    takeaway: "Treat URL structure and component data separately, encode exactly once at the owning boundary, and never mistake successful parsing for a safety decision.",
+    resources: [
+      { label: "WHATWG URL Standard", url: "https://url.spec.whatwg.org/" },
+      { label: "MDN: URLSearchParams", url: "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams" },
+      { label: "OWASP: Server Side Request Forgery Prevention", url: "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html" },
+    ],
+  },
 ];

@@ -830,6 +830,390 @@ function renderWordCounter() {
   update();
 }
 
+function renderUrlParser() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Inspect an absolute URL</h2><p>The address is parsed locally. This tool never visits the destination.</p></div></div>
+      <label class="field"><span>URL</span><textarea id="url-parser-input" spellcheck="false" placeholder="https://example.com:8443/search?q=local+tools&q=privacy#results"></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="parse-url" type="button">Parse URL</button>
+        <button class="button" id="url-parser-sample" type="button">Load example</button>
+        <button class="button" id="url-parser-clear" type="button">Clear</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <div class="panel-heading"><div><h2>URL components</h2><p>Decoded values should still be treated as untrusted input.</p></div></div>
+      <div id="url-components"></div>
+      <div class="panel-heading" style="margin-top: 24px"><div><h2>Query parameters</h2><p>Repeated keys are listed as separate entries in source order.</p></div></div>
+      <div id="url-query"></div>
+    </section>`;
+
+  function createTable(headers, rows) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "result-table-wrap";
+    const table = document.createElement("table");
+    table.className = "result-table";
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    headers.forEach((label) => {
+      const cell = document.createElement("th");
+      cell.textContent = label;
+      headRow.append(cell);
+    });
+    head.append(headRow);
+    const body = document.createElement("tbody");
+    rows.forEach((values) => {
+      const row = document.createElement("tr");
+      values.forEach((value) => {
+        const cell = document.createElement("td");
+        const code = document.createElement("code");
+        code.textContent = value || "—";
+        cell.append(code);
+        row.append(cell);
+      });
+      body.append(row);
+    });
+    table.append(head, body);
+    wrapper.append(table);
+    return wrapper;
+  }
+
+  function parse() {
+    try {
+      const value = byId("url-parser-input").value.trim();
+      if (!value) throw new Error("Enter a complete URL including http:// or https://.");
+      const url = new URL(value);
+      const componentRows = [
+        ["Normalized URL", url.href],
+        ["Scheme", url.protocol],
+        ["Origin", url.origin],
+        ["Username", url.username],
+        ["Password present", url.password ? "Yes — treat this URL as sensitive" : "No"],
+        ["Hostname", url.hostname],
+        ["Port", url.port || "Default for scheme"],
+        ["Path", url.pathname],
+        ["Fragment", url.hash ? url.hash.slice(1) : ""],
+      ];
+      byId("url-components").replaceChildren(createTable(["Component", "Value"], componentRows));
+      const queryRows = [...url.searchParams.entries()].map(([key, parameterValue], index) => [String(index + 1), key, parameterValue]);
+      byId("url-query").replaceChildren(queryRows.length ? createTable(["#", "Key", "Decoded value"], queryRows) : renderEmpty("This URL has no query parameters."));
+      setStatus(`Parsed ${url.hostname} with ${queryRows.length} query ${queryRows.length === 1 ? "entry" : "entries"}.`, "success");
+    } catch (error) {
+      byId("url-components").replaceChildren();
+      byId("url-query").replaceChildren();
+      setStatus(`URL error: ${error.message}`, "error");
+    }
+  }
+
+  byId("parse-url").addEventListener("click", parse);
+  byId("url-parser-sample").addEventListener("click", () => {
+    byId("url-parser-input").value = "https://example.com:8443/search?q=local+tools&q=privacy&return_to=https%3A%2F%2F77toolkit.com%2Fguides%2F#results";
+    parse();
+  });
+  byId("url-parser-clear").addEventListener("click", () => {
+    byId("url-parser-input").value = "";
+    byId("url-components").replaceChildren();
+    byId("url-query").replaceChildren();
+    setStatus("");
+  });
+}
+
+function renderUrlEncoder() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Encode or decode URL text</h2><p>Use component mode for one parameter value and full-URI mode for an already structured address.</p></div></div>
+      <div class="control-grid">
+        <label class="field"><span>Mode</span><select id="url-encoding-mode"><option value="component">Single component</option><option value="uri">Complete URI</option></select></label>
+      </div>
+      <label class="field"><span>Input</span><textarea id="url-encoding-input" spellcheck="false" placeholder="reports/July & August"></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="encode-url" type="button">Encode</button>
+        <button class="button" id="decode-url" type="button">Decode</button>
+        <button class="button" id="url-encoding-sample" type="button">Load example</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <label class="field"><span>Result</span><textarea id="url-encoding-output" readonly spellcheck="false" placeholder="Encoded or decoded result"></textarea></label>
+      <div class="toolbar">
+        <button class="button" id="copy-url-result" type="button">Copy result</button>
+        <button class="button" id="reuse-url-result" type="button">Use as input</button>
+      </div>
+    </section>`;
+
+  function convert(direction) {
+    try {
+      const input = byId("url-encoding-input").value;
+      const componentMode = byId("url-encoding-mode").value === "component";
+      const result = direction === "encode"
+        ? (componentMode ? encodeURIComponent(input) : encodeURI(input))
+        : (componentMode ? decodeURIComponent(input) : decodeURI(input));
+      byId("url-encoding-output").value = result;
+      setStatus(`${direction === "encode" ? "Encoded" : "Decoded"} in ${componentMode ? "component" : "full-URI"} mode. Review separators before reuse.`, "success");
+    } catch (error) {
+      byId("url-encoding-output").value = "";
+      setStatus(`Encoding error: ${error.message}`, "error");
+    }
+  }
+
+  byId("encode-url").addEventListener("click", () => convert("encode"));
+  byId("decode-url").addEventListener("click", () => convert("decode"));
+  byId("url-encoding-sample").addEventListener("click", () => {
+    byId("url-encoding-mode").value = "component";
+    byId("url-encoding-input").value = "reports/July & August + review";
+    convert("encode");
+  });
+  byId("copy-url-result").addEventListener("click", () => copyText(byId("url-encoding-output").value));
+  byId("reuse-url-result").addEventListener("click", () => {
+    byId("url-encoding-input").value = byId("url-encoding-output").value;
+    setStatus("Result moved to input.", "success");
+  });
+}
+
+function renderCsvJsonConverter() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Convert CSV and JSON</h2><p>CSV imports use the first row as unique column names. Values remain strings.</p></div></div>
+      <div class="control-grid">
+        <label class="field"><span>CSV delimiter</span><select id="csv-delimiter"><option value=",">Comma</option><option value=";">Semicolon</option><option value="tab">Tab</option></select></label>
+      </div>
+      <label class="field"><span>Source data</span><textarea id="csv-json-input" style="min-height: 260px" spellcheck="false" placeholder='name,note&#10;Ada,"local, private"'></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="csv-to-json" type="button">CSV → JSON</button>
+        <button class="button" id="json-to-csv" type="button">JSON → CSV</button>
+        <button class="button" id="csv-json-sample" type="button">Load CSV example</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <label class="field"><span>Result</span><textarea id="csv-json-output" style="min-height: 260px" readonly spellcheck="false"></textarea></label>
+      <div class="toolbar">
+        <button class="button" id="copy-csv-json" type="button">Copy result</button>
+        <button class="button" id="reuse-csv-json" type="button">Use as input</button>
+      </div>
+    </section>`;
+
+  const delimiter = () => byId("csv-delimiter").value === "tab" ? "\t" : byId("csv-delimiter").value;
+
+  function parseCsv(text, separator) {
+    const rows = [];
+    let row = [];
+    let field = "";
+    let quoted = false;
+    let touched = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const character = text[index];
+      touched = true;
+      if (quoted) {
+        if (character === '"' && text[index + 1] === '"') {
+          field += '"';
+          index += 1;
+        } else if (character === '"') {
+          quoted = false;
+        } else {
+          field += character;
+        }
+      } else if (character === '"' && field === "") {
+        quoted = true;
+      } else if (character === separator) {
+        row.push(field);
+        field = "";
+      } else if (character === "\n" || character === "\r") {
+        if (character === "\r" && text[index + 1] === "\n") index += 1;
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = "";
+      } else {
+        field += character;
+      }
+    }
+    if (quoted) throw new Error("A quoted CSV field is not closed.");
+    if (touched && (field !== "" || row.length || !/[\r\n]$/.test(text))) {
+      row.push(field);
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function csvToJson() {
+    try {
+      const rows = parseCsv(byId("csv-json-input").value, delimiter());
+      if (rows.length < 2) throw new Error("CSV needs a header row and at least one data row.");
+      const headers = rows[0].map((header) => header.trim());
+      if (headers.some((header) => !header)) throw new Error("Every CSV column needs a non-empty header.");
+      if (new Set(headers).size !== headers.length) throw new Error("CSV headers must be unique.");
+      const records = rows.slice(1).filter((row) => row.some((value) => value !== "")).map((row, index) => {
+        if (row.length !== headers.length) throw new Error(`Row ${index + 2} has ${row.length} fields; expected ${headers.length}.`);
+        return Object.fromEntries(headers.map((header, column) => [header, row[column]]));
+      });
+      byId("csv-json-output").value = JSON.stringify(records, null, 2);
+      setStatus(`Converted ${records.length} records and ${headers.length} columns. CSV values remain strings.`, "success");
+    } catch (error) {
+      byId("csv-json-output").value = "";
+      setStatus(`CSV error: ${error.message}`, "error");
+    }
+  }
+
+  function csvCell(value, separator) {
+    let text = value == null ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+    if (text.includes('"')) text = text.replaceAll('"', '""');
+    return text.includes(separator) || /["\r\n]/.test(text) ? `"${text}"` : text;
+  }
+
+  function jsonToCsv() {
+    try {
+      const records = JSON.parse(byId("csv-json-input").value);
+      if (!Array.isArray(records) || !records.length) throw new Error("JSON must be a non-empty array of objects.");
+      if (records.some((record) => !record || Array.isArray(record) || typeof record !== "object")) throw new Error("Every array item must be an object.");
+      const headers = [...new Set(records.flatMap((record) => Object.keys(record)))];
+      if (!headers.length) throw new Error("The objects do not contain any properties.");
+      const separator = delimiter();
+      const rows = [
+        headers.map((header) => csvCell(header, separator)).join(separator),
+        ...records.map((record) => headers.map((header) => csvCell(record[header], separator)).join(separator)),
+      ];
+      const formulaLike = records.some((record) => Object.values(record).some((value) => typeof value === "string" && /^[=+\-@]/.test(value)));
+      byId("csv-json-output").value = rows.join("\n");
+      setStatus(`Converted ${records.length} records and ${headers.length} columns.${formulaLike ? " Review formula-like cells before opening this file in a spreadsheet." : ""}`, formulaLike ? "info" : "success");
+    } catch (error) {
+      byId("csv-json-output").value = "";
+      setStatus(`JSON error: ${error.message}`, "error");
+    }
+  }
+
+  byId("csv-to-json").addEventListener("click", csvToJson);
+  byId("json-to-csv").addEventListener("click", jsonToCsv);
+  byId("csv-json-sample").addEventListener("click", () => {
+    byId("csv-delimiter").value = ",";
+    byId("csv-json-input").value = 'name,note,code\nAda,"local, private",007\nLin,"line one\nline two",042';
+    csvToJson();
+  });
+  byId("copy-csv-json").addEventListener("click", () => copyText(byId("csv-json-output").value));
+  byId("reuse-csv-json").addEventListener("click", () => {
+    byId("csv-json-input").value = byId("csv-json-output").value;
+    setStatus("Result moved to input. Choose the opposite conversion to test a round trip.", "success");
+  });
+}
+
+function renderHtmlEntities() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Encode or decode HTML character references</h2><p>The result is always displayed as text and is never executed as markup.</p></div></div>
+      <label class="field"><span>Input</span><textarea id="html-entity-input" spellcheck="false" placeholder="<strong>Tools & privacy</strong>"></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="encode-html-entities" type="button">Encode entities</button>
+        <button class="button" id="decode-html-entities" type="button">Decode entities</button>
+        <button class="button" id="html-entity-sample" type="button">Load example</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <label class="field"><span>Result</span><textarea id="html-entity-output" readonly spellcheck="false"></textarea></label>
+      <div class="toolbar"><button class="button" id="copy-html-entities" type="button">Copy result</button><button class="button" id="reuse-html-entities" type="button">Use as input</button></div>
+    </section>`;
+
+  function encode() {
+    const replacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    byId("html-entity-output").value = byId("html-entity-input").value.replace(/[&<>"']/g, (character) => replacements[character]);
+    setStatus("Encoded five HTML-sensitive characters. Confirm the destination context before interpolation.", "success");
+  }
+
+  function decode() {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = byId("html-entity-input").value.replaceAll("<", "&lt;");
+    byId("html-entity-output").value = textarea.value;
+    setStatus("Decoded browser-recognized named and numeric references as plain text.", "success");
+  }
+
+  byId("encode-html-entities").addEventListener("click", encode);
+  byId("decode-html-entities").addEventListener("click", decode);
+  byId("html-entity-sample").addEventListener("click", () => {
+    byId("html-entity-input").value = '<strong title="local">Tools & privacy</strong>';
+    encode();
+  });
+  byId("copy-html-entities").addEventListener("click", () => copyText(byId("html-entity-output").value));
+  byId("reuse-html-entities").addEventListener("click", () => {
+    byId("html-entity-input").value = byId("html-entity-output").value;
+    setStatus("Result moved to input.", "success");
+  });
+}
+
+function renderCssUnitConverter() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>CSS measurement assumptions</h2><p>Set the values that apply to the component before comparing units.</p></div></div>
+      <div class="control-grid">
+        <label class="field"><span>Value</span><input id="css-unit-value" type="number" value="24" step="any"></label>
+        <label class="field"><span>Source unit</span><select id="css-source-unit"><option value="px">px</option><option value="rem">rem</option><option value="em">em</option><option value="vw">vw</option><option value="vh">vh</option></select></label>
+        <label class="field"><span>Root font size (px)</span><input id="css-root-size" type="number" value="16" min="0.1" step="any"></label>
+        <label class="field"><span>Element font size (px)</span><input id="css-element-size" type="number" value="16" min="0.1" step="any"></label>
+        <label class="field"><span>Viewport width (px)</span><input id="css-viewport-width" type="number" value="1440" min="1" step="1"></label>
+        <label class="field"><span>Viewport height (px)</span><input id="css-viewport-height" type="number" value="900" min="1" step="1"></label>
+      </div>
+      <div class="toolbar"><button class="button button-primary" id="convert-css-unit" type="button">Convert units</button><button class="button" id="css-unit-sample" type="button">Reset example</button></div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <div class="stat-grid">
+        <div class="metric"><strong id="css-result-px">—</strong><span>px</span></div>
+        <div class="metric"><strong id="css-result-rem">—</strong><span>rem</span></div>
+        <div class="metric"><strong id="css-result-em">—</strong><span>em</span></div>
+        <div class="metric"><strong id="css-result-vw">—</strong><span>vw</span></div>
+        <div class="metric"><strong id="css-result-vh">—</strong><span>vh</span></div>
+      </div>
+    </section>`;
+
+  function cleanNumber(value) {
+    return Number(value.toFixed(6)).toLocaleString(undefined, { maximumFractionDigits: 6 });
+  }
+
+  function convert() {
+    const value = Number(byId("css-unit-value").value);
+    const rootSize = Number(byId("css-root-size").value);
+    const elementSize = Number(byId("css-element-size").value);
+    const viewportWidth = Number(byId("css-viewport-width").value);
+    const viewportHeight = Number(byId("css-viewport-height").value);
+    if (![value, rootSize, elementSize, viewportWidth, viewportHeight].every(Number.isFinite) || rootSize <= 0 || elementSize <= 0 || viewportWidth <= 0 || viewportHeight <= 0) {
+      setStatus("Enter a finite value and positive font and viewport sizes.", "error");
+      return;
+    }
+    const source = byId("css-source-unit").value;
+    const pixelValue = {
+      px: value,
+      rem: value * rootSize,
+      em: value * elementSize,
+      vw: value * viewportWidth / 100,
+      vh: value * viewportHeight / 100,
+    }[source];
+    const results = {
+      px: pixelValue,
+      rem: pixelValue / rootSize,
+      em: pixelValue / elementSize,
+      vw: pixelValue / viewportWidth * 100,
+      vh: pixelValue / viewportHeight * 100,
+    };
+    Object.entries(results).forEach(([unit, result]) => {
+      byId(`css-result-${unit}`).textContent = cleanNumber(result);
+    });
+    setStatus(`Converted ${value} ${source} using the stated layout assumptions. Verify computed styles in the real page.`, "success");
+  }
+
+  ["css-unit-value", "css-source-unit", "css-root-size", "css-element-size", "css-viewport-width", "css-viewport-height"].forEach((id) => byId(id).addEventListener("input", convert));
+  byId("convert-css-unit").addEventListener("click", convert);
+  byId("css-unit-sample").addEventListener("click", () => {
+    byId("css-unit-value").value = "24";
+    byId("css-source-unit").value = "px";
+    byId("css-root-size").value = "16";
+    byId("css-element-size").value = "16";
+    byId("css-viewport-width").value = "1440";
+    byId("css-viewport-height").value = "900";
+    convert();
+  });
+  convert();
+}
+
 async function decodeImage(file) {
   if (!file || !file.type.startsWith("image/")) throw new Error("Choose a supported image file.");
   if (file.size > 50 * 1024 * 1024) throw new Error("Keep images below 50 MB for reliable browser processing.");
@@ -1158,6 +1542,11 @@ const renderers = {
   "image-converter": () => renderImageTransform("converter"),
   "contrast-checker": renderContrast,
   "metadata-remover": () => renderImageTransform("metadata"),
+  "url-parser": renderUrlParser,
+  "url-encoder": renderUrlEncoder,
+  "csv-json-converter": renderCsvJsonConverter,
+  "html-entities": renderHtmlEntities,
+  "css-unit-converter": renderCssUnitConverter,
 };
 
 if (!root || !config || !renderers[config.slug]) {
