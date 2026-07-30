@@ -95,6 +95,54 @@ export const toolEditorial = {
     checklist: ["Match the expected SHA algorithm.", "Trust the source of the reference digest.", "Compare the full value, not a prefix.", "Use dedicated password hashing for credentials."],
     relatedGuides: [],
   },
+  "xml-formatter": {
+    scenarios: [
+      { title: "API payload diagnosis", text: "Format a compact SOAP, RSS, Atom, sitemap, or custom XML response to find the element where nesting or namespaces differ from the receiving contract." },
+      { title: "Configuration review", text: "Validate a small application or build configuration before committing it, while keeping credentials and internal hostnames on the device." },
+      { title: "Source comparison", text: "Normalize two short XML fragments into a readable shape before comparing their structural differences in a text diff." },
+    ],
+    review: "Inspect the XML declaration, root element, namespace prefixes, attribute values, entity references, comments, CDATA, and whitespace-sensitive text. A successful parse proves only that elements and syntax are well formed.",
+    alternative: "Use an XSD-aware validator, application test suite, or specialized editor when schema rules, external entities, XPath, canonicalization, signatures, or very large streaming documents matter.",
+    privacy: "Source and result remain in the browser tab. XML commonly contains credentials, internal URLs, customer identifiers, and signed data, so use synthetic samples in public issues and avoid formatting active secrets on an untrusted device.",
+    checklist: ["Confirm one root document is present.", "Validate against the real schema separately.", "Review mixed-content whitespace.", "Do not reformat signed XML casually."],
+    relatedGuides: [],
+  },
+  "cron-inspector": {
+    scenarios: [
+      { title: "Deployment review", text: "Check a scheduled backup, report, cleanup, or integration expression before adding it to a server, container, CI workflow, or cloud scheduler." },
+      { title: "Timezone incident", text: "Compare expected wall-clock times with the device timezone when a job appears an hour early, an hour late, duplicated, or missing." },
+      { title: "Dialect migration", text: "Identify unsupported seconds, year, question-mark, last-day, weekday, or macro syntax while moving a schedule between platforms." },
+    ],
+    review: "Record the exact cron dialect, timezone, daylight-saving policy, concurrency behavior, retry policy, and what happens after downtime. Preview both ordinary dates and the next timezone transition when local civil time is involved.",
+    alternative: "Use the scheduler's own validator and execution history for production confirmation. Event queues, durable workflows, or application-level scheduling are better when every run must be guaranteed, retried, deduplicated, or audited.",
+    privacy: "The expression is parsed locally and usually contains no secret. Job timing can still reveal internal operational routines, maintenance windows, reporting cycles, or backup policy when shared publicly.",
+    checklist: ["Confirm five-field order.", "Match the production timezone.", "Check DOM/DOW semantics.", "Test daylight-saving and missed-run behavior."],
+    relatedGuides: ["cron-schedules-and-timezones", "timestamps-and-timezones"],
+  },
+  "password-generator": {
+    scenarios: [
+      { title: "Password-manager entry", text: "Create a unique high-entropy password for an account whose registration form cannot invoke the password manager's built-in generator." },
+      { title: "Legacy composition rules", text: "Satisfy a documented requirement for uppercase, lowercase, numbers, or symbols without replacing secure randomness with a predictable personal pattern." },
+      { title: "Temporary credential", text: "Generate a one-time initial secret that must be transferred through an approved channel and changed by the recipient at first use." },
+    ],
+    review: "Prefer the longest value the service accepts, keep every account unique, verify that copying did not add spaces, and store the result before closing the page. Do not send passwords through ordinary email or public chat.",
+    alternative: "Use the generator built into a reputable password manager whenever possible because it can create, fill, store, synchronize, and audit the credential without exposing it through an extra clipboard step. Use passkeys when the service supports them.",
+    privacy: "Generation is local and the site does not retain a password history. Browser extensions, clipboard managers, screen capture, device malware, and people nearby remain outside the page's control, so generate only on a trusted device.",
+    checklist: ["Use a unique value per account.", "Prefer a password manager or passkey.", "Match the site's maximum length.", "Clear exposed clipboard history."],
+    relatedGuides: [],
+  },
+  "date-calculator": {
+    scenarios: [
+      { title: "Project planning", text: "Measure calendar and weekday spans between milestones before applying an organization's holiday calendar and working-hour policy." },
+      { title: "Renewal and expiry", text: "Add a documented number of days, months, or years to a start date and inspect how month-end clamping changes the result." },
+      { title: "Editorial timeline", text: "Count inclusive calendar dates for a campaign or event while keeping that convention explicit for collaborators." },
+    ],
+    review: "Decide whether the rule uses elapsed days, inclusive dates, weekdays, business days, calendar months, or fixed-hour durations. Test leap years, month ends, reverse order, and jurisdiction-specific holidays.",
+    alternative: "Use a domain-specific calendar library or authoritative system for legal deadlines, financial day-count conventions, trading calendars, payroll, holidays, and timezone-aware timestamps. This page performs transparent general calendar arithmetic.",
+    privacy: "Date-only values are processed locally. Dates associated with medical events, employment, travel, contracts, or customer records can still be personal information when exposed in screenshots or reports.",
+    checklist: ["Name the counting convention.", "Check month-end clamping.", "Apply official holidays separately.", "Use timestamp tools for time-of-day work."],
+    relatedGuides: ["cron-schedules-and-timezones", "timestamps-and-timezones"],
+  },
   "text-clean": {
     scenarios: [
       { title: "Document handoff", text: "Remove copied styling and repeated blank lines before moving chat or document text into an email, CMS, or plain-text field." },
@@ -153,6 +201,18 @@ export const toolEditorial = {
     alternative: "Use a language-specific editor for readability scoring, grammar, citations, or editorial quality. Counts describe surface structure and cannot determine whether writing is accurate or useful.",
     privacy: "Analysis runs locally and no document history is created by the site. The browser, clipboard, and device may still retain content according to their own policies.",
     checklist: ["Identify words or characters as the real limit.", "Check whether spaces count.", "Compare the destination platform counter.", "Use frequency results as prompts, not quality scores."],
+    relatedGuides: [],
+  },
+  "markdown-preview": {
+    scenarios: [
+      { title: "README drafting", text: "Preview headings, lists, links, quotations, and code while drafting a short project note without uploading an unpublished repository description." },
+      { title: "CMS handoff", text: "Inspect the HTML shape produced by a bounded Markdown subset before placing reviewed content into a system with its own sanitizer." },
+      { title: "Unsafe sample review", text: "Demonstrate that pasted tags remain text in this preview while discussing why raw HTML support requires a maintained sanitization policy." },
+    ],
+    review: "Compare the result in the destination Markdown engine. Pay special attention to blank lines, nested lists, underscores inside words, link destinations, raw HTML, code fences, and features this subset intentionally leaves unsupported.",
+    alternative: "Use a maintained CommonMark or GitHub Flavored Markdown parser together with a well-configured HTML sanitizer when exact dialect compatibility, plugins, tables, task lists, or untrusted production content are required.",
+    privacy: "Draft text and generated nodes remain in the tab. Documents can contain unpublished plans, internal links, credentials in code blocks, or personal information, so remove secrets before sharing previews or copied HTML.",
+    checklist: ["Confirm the destination dialect.", "Review every link target.", "Keep raw HTML disabled for untrusted input.", "Sanitize again at the production boundary."],
     relatedGuides: [],
   },
   "color-spectrum": {

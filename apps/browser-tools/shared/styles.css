@@ -270,6 +270,7 @@ h1 {
 textarea,
 input[type="text"],
 input[type="number"],
+input[type="date"],
 input[type="datetime-local"],
 select,
 .code-output {
@@ -295,6 +296,7 @@ textarea,
 
 input[type="text"],
 input[type="number"],
+input[type="date"],
 input[type="datetime-local"],
 select {
   min-height: 43px;
@@ -453,6 +455,142 @@ select:focus,
 .result-table code {
   font-family: "SFMono-Regular", Consolas, monospace;
   word-break: break-all;
+}
+
+.definition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.definition-grid > div {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfd;
+  padding: 12px 14px;
+}
+
+.definition-grid dt {
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.definition-grid dd {
+  margin: 5px 0 0;
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.result-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result-list li {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfd;
+  padding: 12px 14px;
+}
+
+.result-list strong {
+  font-size: 0.88rem;
+}
+
+.result-list code {
+  color: var(--muted);
+  font-size: 0.76rem;
+  word-break: break-word;
+}
+
+.markdown-preview {
+  min-height: 300px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text);
+  padding: 18px;
+}
+
+.markdown-preview > :first-child {
+  margin-top: 0;
+}
+
+.markdown-preview > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+  margin: 1.25em 0 0.5em;
+  line-height: 1.25;
+}
+
+.markdown-preview h1 {
+  font-size: 1.7rem;
+}
+
+.markdown-preview h2 {
+  font-size: 1.4rem;
+}
+
+.markdown-preview h3 {
+  font-size: 1.15rem;
+}
+
+.markdown-preview p,
+.markdown-preview li,
+.markdown-preview blockquote {
+  color: #465361;
+  line-height: 1.65;
+}
+
+.markdown-preview a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.markdown-preview blockquote {
+  margin-left: 0;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 10px 14px;
+}
+
+.markdown-preview pre {
+  overflow: auto;
+  border-radius: 8px;
+  background: #17212b;
+  color: #f3f6f8;
+  padding: 14px;
+}
+
+.markdown-preview code {
+  border-radius: 4px;
+  background: #edf1f3;
+  padding: 0.12em 0.34em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.markdown-preview pre code {
+  background: transparent;
+  padding: 0;
 }
 
 .change-added {
@@ -685,7 +823,8 @@ mark {
   .tool-hero,
   .input-grid,
   .output-grid,
-  .preview-grid {
+  .preview-grid,
+  .definition-grid {
     grid-template-columns: 1fr;
   }
 

@@ -6,7 +6,7 @@ repository:
 - static, crawlable homepage links for every tool;
 - task-specific scenarios, review checklists, alternatives, privacy notes,
   examples, limitations, and FAQs for every tool page;
-- eleven original long-form guides with primary references and related tools;
+- twelve original long-form guides with primary references and related tools;
 - real About, Editorial Policy, Accessibility, Privacy, Terms, Contact, and
   human-readable Site Map pages;
 - category landing pages for Developer, Text, Image, and Web tools;
@@ -31,9 +31,9 @@ These steps cannot be completed in source code:
 4. Inspect the homepage, all four category pages, all information pages,
    every guide, and representative tool pages. Resolve indexing, crawl, or
    mobile usability issues.
-5. Configure permanent `301` redirects from the three retired tool subdomains
-   to their canonical `/tools/.../` paths and verify that none still serves a
-   duplicate `200` page.
+5. After verifying the unified routes, remove the three retired tool
+   subdomains and their old Pages custom-domain bindings in Cloudflare. Confirm
+   that none still serves a duplicate `200` page.
 6. Reapply only after the deployed pages are accessible and Search Console has
    crawled the new structure.
 

@@ -487,6 +487,14 @@ async function validateBuildOutput() {
   const missingRoutes = new Set();
   const catalogSlugs = new Set(toolCatalog.map((tool) => tool.slug));
   const guideSlugs = new Set(guideCatalog.map((guide) => guide.slug));
+  const categoryNames = new Set(Object.keys(categoryContent));
+  const sharedRuntime = await readFile(path.join(sharedSourceRoot, "app.js"), "utf8");
+  const rendererBlock = sharedRuntime.match(/const renderers = \{([\s\S]*?)\n\};/);
+  if (!rendererBlock) throw new Error("Could not inspect the shared tool renderer registry.");
+  const registeredRenderers = new Set(
+    [...rendererBlock[1].matchAll(/^\s*(?:"([^"]+)"|([A-Za-z][A-Za-z0-9]*))\s*:/gm)]
+      .map((match) => match[1] || match[2]),
+  );
 
   if (catalogSlugs.size !== toolCatalog.length) throw new Error("Duplicate tool slugs found in the catalog.");
   if (guideSlugs.size !== guideCatalog.length) throw new Error("Duplicate guide slugs found in the guide catalog.");
@@ -495,8 +503,10 @@ async function validateBuildOutput() {
     if (!catalogSlugs.has(slug)) throw new Error(`Editorial content references unknown tool ${slug}.`);
   }
   for (const tool of toolCatalog) {
+    if (!categoryNames.has(tool.category)) throw new Error(`Unknown category ${tool.category} for ${tool.slug}.`);
     if (!toolContent[tool.slug]) throw new Error(`Missing publisher content for ${tool.slug}.`);
     if (!toolEditorial[tool.slug]) throw new Error(`Missing editorial review for ${tool.slug}.`);
+    if (tool.implementation === "shared" && !registeredRenderers.has(tool.slug)) throw new Error(`Missing shared renderer for ${tool.slug}.`);
   }
 
   for (const file of htmlFiles) {

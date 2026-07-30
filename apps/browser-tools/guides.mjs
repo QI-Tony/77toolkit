@@ -521,4 +521,64 @@ export const guideCatalog = [
       { label: "OWASP: Server Side Request Forgery Prevention", url: "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html" },
     ],
   },
+  {
+    slug: "cron-schedules-and-timezones",
+    title: "Cron schedules without timezone surprises",
+    description: "Review field order, cron dialects, day matching, daylight-saving transitions, missed runs, overlap, retries, and the operational evidence every schedule needs.",
+    kicker: "Scheduled work",
+    readingTime: "9 min read",
+    published: "2026-07-29",
+    updated: "2026-07-29",
+    relatedTools: ["cron-inspector", "timestamp", "date-calculator"],
+    sections: [
+      {
+        heading: "Start by naming the exact cron dialect",
+        paragraphs: [
+          "Cron is a family of schedule syntaxes rather than one universal contract. A classic crontab entry has five time fields before its command: minute, hour, day of month, month, and day of week. Other systems add seconds or years, replace a command with an application target, support macros such as @daily, or introduce characters such as question mark, L, W, and #. An expression copied between two valid schedulers can therefore be rejected or, worse, accepted with different behavior.",
+          "Record the product and version next to every important schedule. Keep the field order visible in source review, use a sample future run in documentation, and validate through the destination platform before deployment. A generic inspector is useful for finding mistakes in portable five-field syntax, but the platform's own parser is the authority for its extensions and restrictions.",
+        ],
+      },
+      {
+        heading: "Day-of-month and day-of-week can combine unexpectedly",
+        paragraphs: [
+          "Traditional cron commonly treats restricted day-of-month and day-of-week fields as alternatives: the job runs when either field matches. Under that rule, 0 9 1 * 1 can run on every Monday and on the first day of every month, not only when the first day is a Monday. Some cloud schedulers document different rules or require a placeholder in one of the fields.",
+          "Turn ambiguous schedules into explicit test cases. List dates that should run, dates that must not run, month boundaries, leap days, and the first weekday after a holiday when that matters. If the intent is a business concept such as the last working day of a month, cron syntax alone may be the wrong layer; a daily trigger plus application calendar logic is easier to explain and audit.",
+        ],
+      },
+      {
+        heading: "A wall-clock schedule needs a timezone policy",
+        paragraphs: [
+          "An expression such as 30 2 * * * does not identify an instant until a timezone is chosen. Some schedulers use the host timezone, some default to UTC, and some accept a named IANA timezone. A fixed numeric offset is not equivalent to a regional zone because it does not contain daylight-saving and historical rule changes.",
+          "During a forward daylight-saving transition, a local time may never occur. During the backward transition, the same wall-clock time may occur twice. Platforms differ on whether they skip, delay, duplicate, or deduplicate those runs. Prefer UTC when the requirement is an evenly spaced operational cadence. Use a named local zone only when people genuinely expect a local civil time, and document the behavior at both transitions.",
+        ],
+      },
+      {
+        heading: "Scheduling is more than calculating the next timestamp",
+        paragraphs: [
+          "Production behavior also depends on downtime, deployment, retries, and concurrency. Ask whether a missed run is discarded or executed later, whether two instances can overlap, how long a run may take, and what happens after a failure. A task scheduled every five minutes can accumulate work or corrupt shared state if one execution lasts longer than five minutes and the scheduler does not provide mutual exclusion.",
+          "Design handlers to be idempotent when practical. Give each intended run a stable business key, check whether its work already completed, and make retries safe. Use a queue or durable workflow when every event must eventually run. Cron is an appropriate trigger for recurring checks and maintenance, but it is not by itself a record that work succeeded.",
+        ],
+      },
+      {
+        heading: "Create evidence before and after deployment",
+        paragraphs: [
+          "Before release, save the expression, dialect, timezone, expected examples, excluded examples, daylight-saving decision, maximum duration, overlap policy, retry policy, and owner. Preview enough future dates to cross a weekend and month boundary. For monthly or annual schedules, include a short-month or leap-year case instead of inspecting only the next ordinary occurrence.",
+          "After release, monitor actual start time, intended schedule time, completion time, result, retry count, and a correlation identifier. Alert on absence as well as explicit failure because a configuration error may prevent a job from starting at all. Review schedules when ownership, timezone rules, platform configuration, or business calendars change rather than treating the original expression as permanent documentation.",
+        ],
+        bullets: [
+          "Name the scheduler and supported dialect.",
+          "Record timezone and daylight-saving behavior.",
+          "Test both positive and negative dates.",
+          "Define missed-run, retry, overlap, and idempotency policy.",
+          "Monitor completed work, not merely trigger creation.",
+        ],
+      },
+    ],
+    takeaway: "A cron expression is only the first layer: dependable scheduled work also needs a named dialect, timezone rules, calendar examples, safe retries, overlap control, and observable completion.",
+    resources: [
+      { label: "POSIX crontab utility", url: "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/crontab.html" },
+      { label: "IANA Time Zone Database", url: "https://www.iana.org/time-zones" },
+      { label: "Cloudflare Cron Triggers documentation", url: "https://developers.cloudflare.com/workers/configuration/cron-triggers/" },
+    ],
+  },
 ];

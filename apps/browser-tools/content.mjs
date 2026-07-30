@@ -2,9 +2,9 @@ export const categoryContent = {
   Developer: {
     slug: "developer",
     title: "Developer Tools",
-    description: "Local utilities for inspecting, converting, comparing, and generating everyday development data.",
+    description: "Local utilities for inspecting, converting, scheduling, validating, and generating everyday development data.",
     intro: [
-      "Developer work often involves small transformations that do not justify installing another application or sending project data to an unknown service. This collection covers common JSON, token, timestamp, encoding, pattern, identifier, and hashing tasks in focused browser interfaces.",
+      "Developer work often involves small transformations that do not justify installing another application or sending project data to an unknown service. This collection covers JSON, XML, tokens, timestamps, cron schedules, calendar arithmetic, encoding, patterns, identifiers, password generation, and hashing in focused browser interfaces.",
       "The tools are designed for quick inspection and debugging. Inputs are processed on the device whenever the browser provides the required capability. Security-sensitive results still need professional validation before they are used in production systems.",
     ],
     principles: [
@@ -16,10 +16,10 @@ export const categoryContent = {
   Text: {
     slug: "text",
     title: "Text Tools",
-    description: "Practical tools for cleaning, comparing, reshaping, and measuring text without uploading it.",
+    description: "Practical tools for cleaning, comparing, reshaping, measuring, and previewing text without uploading it.",
     intro: [
       "Text passes through chat applications, documents, spreadsheets, code editors, and web forms, often carrying formatting or structure that is inconvenient in the next destination. These tools handle common cleanup and transformation tasks while keeping the original text visible.",
-      "Every text utility works in the browser and does not require an account. The collection supports both editorial work and developer-oriented naming formats, with results that remain easy to review before copying.",
+      "Every text utility works in the browser and does not require an account. The collection supports editorial work, developer-oriented naming formats, and a safe Markdown preview, with source and results kept easy to review before copying.",
     ],
     principles: [
       "Immediate results that remain editable and reviewable",
@@ -150,6 +150,86 @@ export const toolContent = {
       { question: "Why does the same-looking text have a different hash?", answer: "Encoding, line endings, invisible whitespace, and Unicode normalization can change the underlying bytes." },
     ],
   },
+  "xml-formatter": {
+    intro: "XML Formatter validates an XML document with the browser parser, then presents either an indented or compact serialization. It is intended for configuration files, feeds, API payloads, SVG source, and short document fragments where a readable structure makes mismatched elements or unexpected namespaces easier to diagnose.",
+    steps: [
+      "Paste one complete XML document and select Validate and format.",
+      "Read any parser error before using the normalized output.",
+      "Review whitespace-sensitive text, namespace declarations, comments, and processing instructions before copying the formatted or minified result.",
+    ],
+    example: { input: "<catalog><tool id=\"77\"><name>XML Formatter</name></tool></catalog>", output: "<catalog>\n  <tool id=\"77\">\n    <name>XML Formatter</name>\n  </tool>\n</catalog>" },
+    howItWorks: "The browser DOMParser reads the source as application/xml. A parser error stops conversion. Valid nodes are serialized back to XML, and the readable view inserts indentation between structural tags without contacting a schema service or fetching external resources.",
+    limitations: [
+      "Well-formed XML can still violate an XSD, DTD, namespace contract, or application-specific schema.",
+      "Pretty printing can add whitespace between elements, so mixed-content and digitally signed documents require special care.",
+      "The tool does not resolve external entities, download referenced resources, or execute embedded SVG scripts.",
+    ],
+    faqs: [
+      { question: "Does valid XML mean the data is accepted by my application?", answer: "No. This page checks well-formed syntax only; validate the result against the schema and business rules used by the receiving system." },
+      { question: "Why did an empty element change shape?", answer: "Browser serialization may normalize equivalent syntax such as an explicit opening and closing pair versus a self-closing element." },
+      { question: "Can I safely format signed XML?", answer: "Do not assume so. Canonicalization and whitespace can affect signatures; use the signing system's approved XML canonicalization workflow." },
+    ],
+  },
+  "cron-inspector": {
+    intro: "Cron Expression Inspector checks portable five-field schedules for minute, hour, day of month, month, and day of week. It expands lists, ranges, wildcards, and step values, then previews upcoming runs in the timezone configured on the current device so scheduling mistakes become visible before deployment.",
+    steps: [
+      "Paste a five-field expression such as 15 9 * * 1-5.",
+      "Validate the fields and read the plain-language field summary.",
+      "Compare the next run times with the timezone and cron implementation used by the real scheduler.",
+    ],
+    example: { input: "15 9 * * 1-5", output: "At minute 15 past hour 9 on Monday through Friday; upcoming runs shown in the device timezone" },
+    howItWorks: "Each field is parsed into an allowed set of numeric values. The preview advances minute by minute through a bounded future window and applies traditional cron day matching, where restricted day-of-month and day-of-week fields match when either one is satisfied.",
+    limitations: [
+      "Only classic five-field syntax is supported; seconds, years, L, W, #, ?, @daily, and vendor macros are intentionally rejected.",
+      "Cron dialects disagree about day matching, Sunday numbering, daylight-saving transitions, and missed runs.",
+      "The preview uses the device timezone and is not a guarantee that a cloud scheduler has the same timezone or retry policy.",
+    ],
+    faqs: [
+      { question: "Why is my six-field expression rejected?", answer: "Some platforms add a seconds field. This tool deliberately accepts only the portable five-field minute-first form." },
+      { question: "What happens during daylight-saving changes?", answer: "A local clock time may be skipped or repeated. Confirm the production scheduler's documented behavior and consider scheduling in UTC." },
+      { question: "Does 0 0 1 * 1 mean Monday and the first day together?", answer: "Traditional cron commonly treats the two restricted day fields as OR, but some services differ. The tool states the rule it uses so you can compare it with your platform." },
+    ],
+  },
+  "password-generator": {
+    intro: "Password Generator creates independent random passwords with the browser cryptography API. Length, quantity, character groups, required-group behavior, and ambiguous-character removal are visible controls, making it useful when an account requires a password that cannot be created directly inside a password manager.",
+    steps: [
+      "Choose a length, quantity, and at least one character group.",
+      "Keep the require-each-group option enabled when the destination enforces composition rules.",
+      "Generate, transfer the chosen value directly into a trusted password manager, and clear it from clipboard history where appropriate.",
+    ],
+    example: { input: "20 characters · upper, lower, numbers, symbols · exclude ambiguous", output: "A fresh password assembled with unbiased cryptographic random selection" },
+    howItWorks: "Random bytes come from crypto.getRandomValues. Rejection sampling avoids modulo bias when selecting from a character set, required groups are inserted explicitly, and the final characters are shuffled again with secure random indexes.",
+    limitations: [
+      "The displayed entropy estimate assumes independent selection from the visible alphabet and is guidance rather than a strength certification.",
+      "A compromised browser, extension, operating system, clipboard manager, or screen recorder can still expose generated values.",
+      "The tool cannot check whether a site stores passwords correctly or whether a generated value has been reused elsewhere.",
+    ],
+    faqs: [
+      { question: "Is a long password always accepted?", answer: "No. Some services impose maximum lengths or reject particular symbols, so review the site's exact rules without weakening the password more than necessary." },
+      { question: "Should I memorize the generated value?", answer: "For most accounts, store a unique value in a reputable password manager and protect that manager with strong authentication." },
+      { question: "Can I use this for encryption keys?", answer: "Not automatically. Cryptographic protocols define key sizes and byte formats; use the key-generation method required by that protocol." },
+    ],
+  },
+  "date-calculator": {
+    intro: "Date Calculator measures the elapsed span between two date-only values and adds or subtracts calendar units from a starting date. It reports total days, weekdays, weeks plus days, and an inclusive count, while keeping date-only arithmetic separate from clocks and timezone offsets.",
+    steps: [
+      "Choose a start and end date to measure their signed calendar-day difference.",
+      "Review total days, inclusive days, weekdays, and the weeks-plus-days representation.",
+      "For calendar arithmetic, select a quantity and unit, then verify how month-end or leap-day clamping affects the result.",
+    ],
+    example: { input: "Start 2026-01-31 · add 1 month", output: "2026-02-28 because February has no day 31" },
+    howItWorks: "Date inputs are converted to UTC calendar components so daylight-saving clock changes do not turn a date-only span into 23 or 25 hours. Month and year operations preserve the intended day when possible and clamp to the last valid day of the target month.",
+    limitations: [
+      "Weekdays exclude Saturday and Sunday but do not know national, regional, company, or market holidays.",
+      "The calculator works with Gregorian date-only values and does not calculate times, durations below one day, or named timezone transitions.",
+      "Legal deadlines and billing periods can use domain-specific inclusion rules that differ from the displayed arithmetic.",
+    ],
+    faqs: [
+      { question: "Why are inclusive days one larger?", answer: "Inclusive counting treats both the start and end dates as counted calendar dates; elapsed-day difference measures the boundaries between them." },
+      { question: "How are negative spans handled?", answer: "When the end precedes the start, the total is negative while the component summary identifies the direction." },
+      { question: "Are public holidays excluded from weekdays?", answer: "No. Use an authoritative holiday calendar for the relevant jurisdiction or organization." },
+    ],
+  },
   "text-clean": {
     intro: "Text Clean removes common Markdown markers, copied rich-text artifacts, excessive whitespace, and awkward line breaks while keeping paragraphs readable. It is designed for moving text between chat tools, documents, email, and plain-text fields.",
     steps: ["Paste the copied text into the editor.", "Select Clean Format and review the result in place.", "Copy the cleaned text only after checking headings, lists, and intentional spacing."],
@@ -203,6 +283,26 @@ export const toolContent = {
     faqs: [
       { question: "Are spaces included in the character count?", answer: "The page shows both total characters and a separate count with whitespace removed." },
       { question: "Why is the reading time at least one minute?", answer: "Any non-empty text is rounded up so a short passage is not displayed as zero reading time." },
+    ],
+  },
+  "markdown-preview": {
+    intro: "Markdown Preview turns a practical subset of Markdown into a readable local preview and reviewable HTML source. It supports headings, paragraphs, emphasis, strong text, inline code, fenced code blocks, quotations, links, horizontal rules, and ordered or unordered lists without executing raw HTML from the pasted document.",
+    steps: [
+      "Paste or write Markdown and select Render preview.",
+      "Compare the visual result with the generated HTML, especially around nested punctuation and list boundaries.",
+      "Copy the HTML only when the destination accepts this supported subset and applies its own sanitization policy.",
+    ],
+    example: { input: "## Local tools\n\n- Private input\n- Reviewable output\n\n`npm run build`", output: "A level-two heading, two-item list, and inline code rendered as safe DOM nodes" },
+    howItWorks: "A small browser-side parser recognizes block structures line by line and creates elements with DOM methods. Inline links are restricted to http, https, mailto, anchors, or relative paths. Raw HTML remains visible as text instead of becoming active markup.",
+    limitations: [
+      "This is not a complete CommonMark or GitHub Flavored Markdown implementation and does not support tables, task lists, footnotes, nested lists, or embedded HTML.",
+      "Ambiguous emphasis and deeply nested inline markup may render differently in another Markdown engine.",
+      "Copied HTML still needs contextual sanitization and policy review before accepting untrusted content in a production application.",
+    ],
+    faqs: [
+      { question: "Can pasted script or iframe tags run?", answer: "No. Raw HTML is handled as text, and the preview is assembled with DOM nodes rather than assigning the source to innerHTML." },
+      { question: "Why does GitHub render my document differently?", answer: "GitHub supports a larger Markdown dialect. Use its renderer or a maintained CommonMark library when exact compatibility is required." },
+      { question: "Is the generated HTML automatically safe everywhere?", answer: "No. The preview avoids executing source HTML here, but every destination must still enforce its own allowed elements, attributes, and URL schemes." },
     ],
   },
   "color-spectrum": {

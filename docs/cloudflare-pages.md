@@ -22,7 +22,7 @@ dist/
     ├── image-compressor/index.html
     ├── json-fix/index.html
     ├── text-clean/index.html
-    └── ... 20 more tool routes
+    └── ... 25 more tool routes
 ```
 
 Use these Pages settings:
@@ -50,16 +50,11 @@ Create or update the production Pages project:
 Every push to `main` now rebuilds the single Pages project. Preview branches
 also receive all tool routes under their generated `*.pages.dev` URL.
 
-## Migrate the old subdomains
+## Retire the old subdomains
 
 Keep the existing tool Pages projects online until the unified deployment is
-verified. Then create permanent Cloudflare redirect rules:
-
-| Old hostname | Destination | Status |
-| --- | --- | --- |
-| `color.77toolkit.com/*` | `https://77toolkit.com/tools/color-spectrum/` | `301` |
-| `jsonfix.77toolkit.com/*` | `https://77toolkit.com/tools/json-fix/` | `301` |
-| `textclean.77toolkit.com/*` | `https://77toolkit.com/tools/text-clean/` | `301` |
-
-Test all three redirects before deleting the old Pages projects. Keep
-`api.77toolkit.com` separate for the shared Worker.
+verified. Then remove the custom-domain bindings and DNS records for
+`color.77toolkit.com`, `jsonfix.77toolkit.com`, and
+`textclean.77toolkit.com` in Cloudflare. Confirm that none of those hostnames
+continues to serve an old `200` page. Keep `api.77toolkit.com` separate for the
+shared Worker.

@@ -830,6 +830,664 @@ function renderWordCounter() {
   update();
 }
 
+function renderXmlFormatter() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Validate and reshape XML</h2><p>Checks well-formed syntax only. No schema or external resource is loaded.</p></div></div>
+      <label class="field"><span>XML document</span><textarea id="xml-input" style="min-height: 280px" spellcheck="false" placeholder='<catalog><tool id="77">XML Formatter</tool></catalog>'></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="format-xml" type="button">Validate and format</button>
+        <button class="button" id="minify-xml" type="button">Validate and minify</button>
+        <button class="button" id="xml-sample" type="button">Load example</button>
+        <button class="button" id="xml-clear" type="button">Clear</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <label class="field"><span>Normalized XML</span><textarea id="xml-output" style="min-height: 280px" readonly spellcheck="false"></textarea></label>
+      <div class="toolbar"><button class="button" id="copy-xml" type="button">Copy XML</button><button class="button" id="reuse-xml" type="button">Use as input</button></div>
+    </section>`;
+
+  function parseXml() {
+    const source = byId("xml-input").value.trim();
+    if (!source) throw new Error("Paste one complete XML document.");
+    if (source.length > 2_000_000) throw new Error("Keep XML below 2 MB for responsive browser processing.");
+    const documentNode = new DOMParser().parseFromString(source, "application/xml");
+    const parserError = documentNode.querySelector("parsererror");
+    if (parserError) {
+      const message = parserError.textContent.replace(/\s+/g, " ").trim();
+      throw new Error(message.slice(0, 320) || "The document is not well formed.");
+    }
+    return documentNode;
+  }
+
+  function prettyXml(serialized) {
+    const normalized = serialized.replace(/>\s*</g, "><").replace(/(>)(<)(?!\?xml)/g, "$1\n$2");
+    const lines = normalized.split("\n");
+    let depth = 0;
+    return lines.map((line) => {
+      const trimmed = line.trim();
+      const closes = /^<\//.test(trimmed);
+      const opens = /^<(?!\/|!|\?)[^>]+>$/.test(trimmed)
+        && !/\/>$/.test(trimmed)
+        && !/<\/[^>]+>$/.test(trimmed);
+      if (closes) depth = Math.max(0, depth - 1);
+      const output = `${"  ".repeat(depth)}${trimmed}`;
+      if (opens) depth += 1;
+      return output;
+    }).join("\n");
+  }
+
+  function convert(mode) {
+    try {
+      const documentNode = parseXml();
+      const serialized = new XMLSerializer().serializeToString(documentNode);
+      const result = mode === "format" ? prettyXml(serialized) : serialized.replace(/>\s+</g, "><").trim();
+      byId("xml-output").value = result;
+      const elements = documentNode.getElementsByTagName("*").length;
+      setStatus(`Valid, well-formed XML with ${elements.toLocaleString()} element${elements === 1 ? "" : "s"}. ${mode === "format" ? "Review whitespace-sensitive content after formatting." : "Inter-element whitespace was compacted."}`, "success");
+    } catch (error) {
+      byId("xml-output").value = "";
+      setStatus(`XML error: ${error.message}`, "error");
+    }
+  }
+
+  byId("format-xml").addEventListener("click", () => convert("format"));
+  byId("minify-xml").addEventListener("click", () => convert("minify"));
+  byId("xml-sample").addEventListener("click", () => {
+    byId("xml-input").value = '<?xml version="1.0" encoding="UTF-8"?>\n<catalog xmlns="https://77toolkit.com/catalog"><tool id="77" local="true"><name>XML Formatter</name><tags><tag>validate</tag><tag>format</tag></tags></tool></catalog>';
+    convert("format");
+  });
+  byId("xml-clear").addEventListener("click", () => {
+    byId("xml-input").value = "";
+    byId("xml-output").value = "";
+    setStatus("");
+  });
+  byId("copy-xml").addEventListener("click", () => copyText(byId("xml-output").value));
+  byId("reuse-xml").addEventListener("click", () => {
+    byId("xml-input").value = byId("xml-output").value;
+    setStatus("Result moved to input.", "success");
+  });
+}
+
+function renderCronInspector() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Inspect a five-field cron schedule</h2><p>Field order: minute · hour · day of month · month · day of week.</p></div></div>
+      <label class="field"><span>Cron expression</span><input id="cron-input" type="text" value="15 9 * * 1-5" spellcheck="false" autocomplete="off"></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="inspect-cron" type="button">Inspect schedule</button>
+        <button class="button" id="cron-weekdays" type="button">Weekday example</button>
+        <button class="button" id="cron-monthly" type="button">Monthly example</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <div class="panel-heading"><div><h2>Field interpretation</h2><p id="cron-timezone">Upcoming runs use this device's timezone.</p></div></div>
+      <div id="cron-fields"></div>
+      <div class="panel-heading" style="margin-top: 24px"><div><h2>Next five matching minutes</h2><p>Preview is bounded to two years and does not model retries or missed runs.</p></div></div>
+      <div id="cron-runs"></div>
+    </section>`;
+
+  const monthNames = { JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12 };
+  const weekdayNames = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+  const weekdayLabels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthLabels = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  function parseValue(token, definition) {
+    const upper = token.toUpperCase();
+    const mapped = definition.aliases?.[upper];
+    const value = mapped ?? Number(upper);
+    if (!Number.isInteger(value) || value < definition.min || value > definition.max) {
+      throw new Error(`${definition.label} contains invalid value "${token}".`);
+    }
+    return value;
+  }
+
+  function parseField(source, definition) {
+    if (!source || /[?LW#]/i.test(source)) throw new Error(`${definition.label} uses unsupported syntax.`);
+    const values = new Set();
+    for (const segment of source.split(",")) {
+      if (!segment) throw new Error(`${definition.label} contains an empty list item.`);
+      const parts = segment.split("/");
+      if (parts.length > 2) throw new Error(`${definition.label} contains an invalid step.`);
+      const step = parts[1] === undefined ? 1 : Number(parts[1]);
+      if (!Number.isInteger(step) || step < 1) throw new Error(`${definition.label} step must be a positive integer.`);
+      const base = parts[0];
+      let start;
+      let end;
+      if (base === "*") {
+        start = definition.min;
+        end = definition.max;
+      } else if (base.includes("-")) {
+        const range = base.split("-");
+        if (range.length !== 2) throw new Error(`${definition.label} contains an invalid range.`);
+        start = parseValue(range[0], definition);
+        end = parseValue(range[1], definition);
+        if (start > end) throw new Error(`${definition.label} range must run from lower to higher.`);
+      } else {
+        start = parseValue(base, definition);
+        end = parts[1] === undefined ? start : definition.max;
+      }
+      for (let value = start; value <= end; value += step) {
+        values.add(definition.normalize ? definition.normalize(value) : value);
+      }
+    }
+    return { source, values, wildcard: source === "*" };
+  }
+
+  function listValues(field, labels) {
+    const values = [...field.values].sort((left, right) => left - right);
+    return values.map((value) => labels?.[value] ?? String(value)).join(", ");
+  }
+
+  function parseExpression() {
+    const parts = byId("cron-input").value.trim().replace(/\s+/g, " ").split(" ");
+    if (parts.length !== 5) throw new Error(`Expected 5 fields, found ${parts.length}. Seconds and year fields are not supported.`);
+    const definitions = [
+      { label: "Minute", min: 0, max: 59 },
+      { label: "Hour", min: 0, max: 23 },
+      { label: "Day of month", min: 1, max: 31 },
+      { label: "Month", min: 1, max: 12, aliases: monthNames },
+      { label: "Day of week", min: 0, max: 7, aliases: weekdayNames, normalize: (value) => value === 7 ? 0 : value },
+    ];
+    return definitions.map((definition, index) => ({ ...definition, ...parseField(parts[index], definition) }));
+  }
+
+  function dateMatches(date, fields) {
+    const [minute, hour, dayOfMonth, month, dayOfWeek] = fields;
+    if (!minute.values.has(date.getMinutes()) || !hour.values.has(date.getHours()) || !month.values.has(date.getMonth() + 1)) return false;
+    const monthDayMatches = dayOfMonth.values.has(date.getDate());
+    const weekDayMatches = dayOfWeek.values.has(date.getDay());
+    const dayMatches = dayOfMonth.wildcard && dayOfWeek.wildcard
+      ? true
+      : dayOfMonth.wildcard
+        ? weekDayMatches
+        : dayOfWeek.wildcard
+          ? monthDayMatches
+          : monthDayMatches || weekDayMatches;
+    return dayMatches;
+  }
+
+  function upcomingRuns(fields) {
+    const runs = [];
+    const candidate = new Date();
+    candidate.setSeconds(0, 0);
+    candidate.setMinutes(candidate.getMinutes() + 1);
+    const limit = 60 * 24 * 366 * 2;
+    for (let checked = 0; checked < limit && runs.length < 5; checked += 1) {
+      if (dateMatches(candidate, fields)) runs.push(new Date(candidate));
+      candidate.setMinutes(candidate.getMinutes() + 1);
+    }
+    return runs;
+  }
+
+  function inspect() {
+    try {
+      const fields = parseExpression();
+      const rows = [
+        ["Minute", fields[0].wildcard ? "Every minute" : listValues(fields[0])],
+        ["Hour", fields[1].wildcard ? "Every hour" : listValues(fields[1])],
+        ["Day of month", fields[2].wildcard ? "Every day of month" : listValues(fields[2])],
+        ["Month", fields[3].wildcard ? "Every month" : listValues(fields[3], monthLabels)],
+        ["Day of week", fields[4].wildcard ? "Every day of week" : listValues(fields[4], weekdayLabels)],
+        ["Day-field rule", !fields[2].wildcard && !fields[4].wildcard ? "Day of month OR day of week" : "The restricted day field must match"],
+      ];
+      const fieldList = document.createElement("dl");
+      fieldList.className = "definition-grid";
+      rows.forEach(([label, value]) => {
+        const wrapper = document.createElement("div");
+        const term = document.createElement("dt");
+        const detail = document.createElement("dd");
+        term.textContent = label;
+        detail.textContent = value;
+        wrapper.append(term, detail);
+        fieldList.append(wrapper);
+      });
+      byId("cron-fields").replaceChildren(fieldList);
+
+      const runs = upcomingRuns(fields);
+      const runList = document.createElement("ol");
+      runList.className = "result-list";
+      const formatter = new Intl.DateTimeFormat(undefined, { dateStyle: "full", timeStyle: "long" });
+      runs.forEach((date) => {
+        const item = document.createElement("li");
+        const local = document.createElement("strong");
+        const iso = document.createElement("code");
+        local.textContent = formatter.format(date);
+        iso.textContent = date.toISOString();
+        item.append(local, iso);
+        runList.append(item);
+      });
+      byId("cron-runs").replaceChildren(runs.length ? runList : renderEmpty("No matching minute was found within the next two years."));
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "device local timezone";
+      byId("cron-timezone").textContent = `Upcoming runs use ${timezone}. Confirm the production scheduler's timezone and cron dialect.`;
+      setStatus(`Valid five-field expression. ${runs.length} upcoming run${runs.length === 1 ? "" : "s"} found.`, "success");
+    } catch (error) {
+      byId("cron-fields").replaceChildren();
+      byId("cron-runs").replaceChildren();
+      setStatus(`Cron error: ${error.message}`, "error");
+    }
+  }
+
+  byId("inspect-cron").addEventListener("click", inspect);
+  byId("cron-weekdays").addEventListener("click", () => {
+    byId("cron-input").value = "15 9 * * MON-FRI";
+    inspect();
+  });
+  byId("cron-monthly").addEventListener("click", () => {
+    byId("cron-input").value = "0 8 1 * *";
+    inspect();
+  });
+  inspect();
+}
+
+function renderPasswordGenerator() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Generate independent random passwords</h2><p>Use a password manager's built-in generator when available.</p></div></div>
+      <div class="control-grid">
+        <label class="field"><span>Length (8–128)</span><input id="password-length" type="number" min="8" max="128" value="20"></label>
+        <label class="field"><span>Quantity (1–20)</span><input id="password-count" type="number" min="1" max="20" value="5"></label>
+        <label class="check-row"><input id="password-lower" type="checkbox" checked> Lowercase</label>
+        <label class="check-row"><input id="password-upper" type="checkbox" checked> Uppercase</label>
+        <label class="check-row"><input id="password-numbers" type="checkbox" checked> Numbers</label>
+        <label class="check-row"><input id="password-symbols" type="checkbox" checked> Symbols</label>
+        <label class="check-row"><input id="password-required" type="checkbox" checked> Require every selected group</label>
+        <label class="check-row"><input id="password-ambiguous" type="checkbox" checked> Exclude ambiguous characters</label>
+      </div>
+      <div class="toolbar">
+        <button class="button button-primary" id="generate-passwords" type="button">Generate passwords</button>
+        <button class="button" id="copy-passwords" type="button">Copy all</button>
+        <button class="button" id="clear-passwords" type="button">Clear</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <label class="field"><span>Generated passwords</span><textarea id="password-output" style="min-height: 230px" readonly spellcheck="false" autocomplete="off"></textarea></label>
+      <p class="status-message">Generated values are not saved by 77 Toolkit. Clipboard managers and browser extensions may still retain copied text.</p>
+    </section>`;
+
+  const groups = [
+    ["password-lower", "abcdefghijklmnopqrstuvwxyz"],
+    ["password-upper", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"],
+    ["password-numbers", "0123456789"],
+    ["password-symbols", "!@#$%^&*()-_=+[]{};:,.?/"],
+  ];
+  const ambiguous = new Set("Il1O0o|`'\"()[]{}".split(""));
+
+  function secureIndex(length) {
+    if (length < 1 || length > 256) throw new Error("Character set size is unsupported.");
+    const ceiling = 256 - (256 % length);
+    const bytes = new Uint8Array(1);
+    do crypto.getRandomValues(bytes); while (bytes[0] >= ceiling);
+    return bytes[0] % length;
+  }
+
+  function pick(characters) {
+    return characters[secureIndex(characters.length)];
+  }
+
+  function shuffle(characters) {
+    for (let index = characters.length - 1; index > 0; index -= 1) {
+      const replacement = secureIndex(index + 1);
+      [characters[index], characters[replacement]] = [characters[replacement], characters[index]];
+    }
+    return characters;
+  }
+
+  function generate() {
+    try {
+      const length = Math.min(128, Math.max(8, Number(byId("password-length").value) || 20));
+      const count = Math.min(20, Math.max(1, Number(byId("password-count").value) || 1));
+      byId("password-length").value = length;
+      byId("password-count").value = count;
+      const selected = groups
+        .filter(([id]) => byId(id).checked)
+        .map(([, characters]) => byId("password-ambiguous").checked ? [...characters].filter((character) => !ambiguous.has(character)).join("") : characters);
+      if (!selected.length) throw new Error("Select at least one character group.");
+      if (byId("password-required").checked && length < selected.length) throw new Error("Length must be at least the number of required groups.");
+      const alphabet = [...new Set(selected.join(""))].join("");
+      const passwords = Array.from({ length: count }, () => {
+        const characters = byId("password-required").checked ? selected.map((characterSet) => pick(characterSet)) : [];
+        while (characters.length < length) characters.push(pick(alphabet));
+        return shuffle(characters).join("");
+      });
+      byId("password-output").value = passwords.join("\n");
+      const estimate = Math.floor(length * Math.log2(alphabet.length));
+      setStatus(`Generated ${count} password${count === 1 ? "" : "s"} with approximately ${estimate} bits of selection-space entropy before composition constraints.`, "success");
+    } catch (error) {
+      byId("password-output").value = "";
+      setStatus(`Password error: ${error.message}`, "error");
+    }
+  }
+
+  byId("generate-passwords").addEventListener("click", generate);
+  byId("copy-passwords").addEventListener("click", () => copyText(byId("password-output").value, "Passwords copied. Store them securely and clear clipboard history where appropriate."));
+  byId("clear-passwords").addEventListener("click", () => {
+    byId("password-output").value = "";
+    setStatus("Generated values cleared from this page.", "success");
+  });
+  generate();
+}
+
+function renderDateCalculator() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Difference between two dates</h2><p>Date-only arithmetic avoids daylight-saving clock shifts.</p></div></div>
+      <div class="input-grid">
+        <label class="field"><span>Start date</span><input id="date-start" type="date" min="0100-01-01" max="9999-12-31"></label>
+        <label class="field"><span>End date</span><input id="date-end" type="date" min="0100-01-01" max="9999-12-31"></label>
+      </div>
+      <div class="toolbar"><button class="button button-primary" id="calculate-date-difference" type="button">Calculate difference</button><button class="button" id="date-difference-sample" type="button">Load example</button></div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+      <div class="stat-grid" style="margin-top: 18px">
+        <div class="metric"><strong id="date-total-days">—</strong><span>Elapsed days</span></div>
+        <div class="metric"><strong id="date-inclusive-days">—</strong><span>Inclusive dates</span></div>
+        <div class="metric"><strong id="date-weekdays">—</strong><span>Weekdays after start</span></div>
+        <div class="metric"><strong id="date-weeks-days">—</strong><span>Weeks + days</span></div>
+      </div>
+    </section>
+    <section class="tool-panel panel-divider">
+      <div class="panel-heading"><div><h2>Add or subtract calendar units</h2><p>Month and year results clamp to the last valid day when needed.</p></div></div>
+      <div class="control-grid">
+        <label class="field"><span>Starting date</span><input id="date-base" type="date" min="0100-01-01" max="9999-12-31"></label>
+        <label class="field"><span>Operation</span><select id="date-operation"><option value="add">Add</option><option value="subtract">Subtract</option></select></label>
+        <label class="field"><span>Quantity</span><input id="date-quantity" type="number" min="0" max="100000" value="1"></label>
+        <label class="field"><span>Unit</span><select id="date-unit"><option value="days">Days</option><option value="weeks">Weeks</option><option value="months">Months</option><option value="years">Years</option></select></label>
+      </div>
+      <div class="toolbar"><button class="button button-primary" id="calculate-date-result" type="button">Calculate date</button></div>
+      <div class="metric" style="margin-top: 18px"><strong id="date-result">—</strong><span id="date-result-detail">Result date</span></div>
+    </section>`;
+
+  const dayMilliseconds = 86_400_000;
+
+  function parseDate(id) {
+    const value = byId(id).value;
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) throw new Error("Choose complete dates.");
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const date = new Date(0);
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCFullYear(year, month, day);
+    if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) throw new Error(`Invalid date: ${value}.`);
+    return date;
+  }
+
+  function isoDate(date) {
+    return date.toISOString().slice(0, 10);
+  }
+
+  function longDate(date) {
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "full", timeZone: "UTC" }).format(date);
+  }
+
+  function countWeekdays(start, end) {
+    const direction = Math.sign(end.getTime() - start.getTime());
+    if (!direction) return 0;
+    const rangeStart = direction > 0 ? start.getTime() + dayMilliseconds : end.getTime();
+    const rangeEnd = direction > 0 ? end.getTime() : start.getTime() - dayMilliseconds;
+    const totalDays = Math.floor((rangeEnd - rangeStart) / dayMilliseconds) + 1;
+    const fullWeeks = Math.floor(totalDays / 7);
+    let weekdays = fullWeeks * 5;
+    const remainder = totalDays % 7;
+    const firstDay = new Date(rangeStart).getUTCDay();
+    for (let offset = 0; offset < remainder; offset += 1) {
+      const weekDay = (firstDay + offset) % 7;
+      if (weekDay !== 0 && weekDay !== 6) weekdays += 1;
+    }
+    return weekdays * direction;
+  }
+
+  function calculateDifference() {
+    try {
+      const start = parseDate("date-start");
+      const end = parseDate("date-end");
+      const difference = Math.round((end - start) / dayMilliseconds);
+      const absolute = Math.abs(difference);
+      byId("date-total-days").textContent = difference.toLocaleString();
+      byId("date-inclusive-days").textContent = (difference === 0 ? 1 : Math.sign(difference) * (absolute + 1)).toLocaleString();
+      byId("date-weekdays").textContent = countWeekdays(start, end).toLocaleString();
+      byId("date-weeks-days").textContent = `${difference < 0 ? "−" : ""}${Math.floor(absolute / 7)}w ${absolute % 7}d`;
+      setStatus(`${longDate(start)} to ${longDate(end)}. Weekdays exclude Saturday and Sunday but not holidays.`, "success");
+    } catch (error) {
+      setStatus(`Date error: ${error.message}`, "error");
+    }
+  }
+
+  function calculateResult() {
+    try {
+      const base = parseDate("date-base");
+      const quantity = Number(byId("date-quantity").value);
+      if (!Number.isInteger(quantity) || quantity < 0 || quantity > 100000) throw new Error("Quantity must be a whole number from 0 to 100,000.");
+      const direction = byId("date-operation").value === "subtract" ? -1 : 1;
+      const amount = quantity * direction;
+      const unit = byId("date-unit").value;
+      let result;
+      let clamped = false;
+      if (unit === "days" || unit === "weeks") {
+        result = new Date(base.getTime() + amount * (unit === "weeks" ? 7 : 1) * dayMilliseconds);
+      } else {
+        const originalDay = base.getUTCDate();
+        const monthOffset = unit === "months" ? amount : amount * 12;
+        const targetIndex = base.getUTCFullYear() * 12 + base.getUTCMonth() + monthOffset;
+        const year = Math.floor(targetIndex / 12);
+        const month = ((targetIndex % 12) + 12) % 12;
+        const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+        const day = Math.min(originalDay, lastDay);
+        clamped = day !== originalDay;
+        result = new Date(0);
+        result.setUTCHours(0, 0, 0, 0);
+        result.setUTCFullYear(year, month, day);
+      }
+      if (!Number.isFinite(result.getTime()) || result.getUTCFullYear() < 100 || result.getUTCFullYear() > 9999) throw new Error("Result must stay between years 0100 and 9999.");
+      byId("date-result").textContent = isoDate(result);
+      byId("date-result-detail").textContent = `${longDate(result)}${clamped ? " · clamped to target month end" : ""}`;
+    } catch (error) {
+      byId("date-result").textContent = "—";
+      byId("date-result-detail").textContent = error.message;
+    }
+  }
+
+  const today = new Date();
+  const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+  byId("date-start").value = isoDate(todayUtc);
+  byId("date-end").value = isoDate(new Date(todayUtc.getTime() + 30 * dayMilliseconds));
+  byId("date-base").value = isoDate(todayUtc);
+  byId("calculate-date-difference").addEventListener("click", calculateDifference);
+  byId("date-difference-sample").addEventListener("click", () => {
+    byId("date-start").value = "2026-01-31";
+    byId("date-end").value = "2026-03-02";
+    byId("date-base").value = "2026-01-31";
+    byId("date-quantity").value = "1";
+    byId("date-unit").value = "months";
+    calculateDifference();
+    calculateResult();
+  });
+  byId("calculate-date-result").addEventListener("click", calculateResult);
+  calculateDifference();
+  calculateResult();
+}
+
+function renderMarkdownPreview() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Preview a safe Markdown subset</h2><p>Raw HTML remains text. Tables, nested lists, and plugins are not supported.</p></div></div>
+      <label class="field"><span>Markdown</span><textarea id="markdown-input" style="min-height: 300px" spellcheck="true" placeholder="# Heading&#10;&#10;Write **strong text** and a [safe link](https://example.com)."></textarea></label>
+      <div class="toolbar">
+        <button class="button button-primary" id="render-markdown" type="button">Render preview</button>
+        <button class="button" id="markdown-sample" type="button">Load example</button>
+        <button class="button" id="markdown-clear" type="button">Clear</button>
+      </div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>
+    <section class="tool-panel panel-divider">
+      <div class="output-grid">
+        <div class="field"><span>Preview</span><div class="markdown-preview" id="markdown-preview"></div></div>
+        <label class="field"><span>Generated HTML</span><textarea id="markdown-html" style="min-height: 300px" readonly spellcheck="false"></textarea></label>
+      </div>
+      <div class="toolbar"><button class="button" id="copy-markdown-html" type="button">Copy HTML</button></div>
+    </section>`;
+
+  function safeHref(value) {
+    const trimmed = value.trim();
+    if (/^(?:\/(?!\/)|\.{1,2}\/|#)/.test(trimmed)) return trimmed;
+    try {
+      const url = new URL(trimmed);
+      return ["http:", "https:", "mailto:"].includes(url.protocol) ? trimmed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function appendInline(parent, source) {
+    const pattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*|__[^_\n]+__|\[[^\]\n]+\]\([^\s)\n]+\)|\*[^*\n]+\*|_[^_\n]+_)/g;
+    let cursor = 0;
+    for (const match of source.matchAll(pattern)) {
+      parent.append(document.createTextNode(source.slice(cursor, match.index)));
+      const token = match[0];
+      if (token.startsWith("`")) {
+        const code = document.createElement("code");
+        code.textContent = token.slice(1, -1);
+        parent.append(code);
+      } else if (token.startsWith("**") || token.startsWith("__")) {
+        const strong = document.createElement("strong");
+        strong.textContent = token.slice(2, -2);
+        parent.append(strong);
+      } else if (token.startsWith("[")) {
+        const parts = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        const href = safeHref(parts[2]);
+        if (href) {
+          const link = document.createElement("a");
+          link.textContent = parts[1];
+          link.href = href;
+          link.rel = "noreferrer";
+          parent.append(link);
+        } else {
+          parent.append(document.createTextNode(parts[1]));
+        }
+      } else {
+        const emphasis = document.createElement("em");
+        emphasis.textContent = token.slice(1, -1);
+        parent.append(emphasis);
+      }
+      cursor = match.index + token.length;
+    }
+    parent.append(document.createTextNode(source.slice(cursor)));
+  }
+
+  function isBlockStart(line) {
+    return /^(?:#{1,6}\s+|```|>\s?| {0,3}(?:[-+*]\s+|\d+\.\s+)| {0,3}(?:-{3,}|\*{3,}|_{3,})\s*$)/.test(line);
+  }
+
+  function parseMarkdown(source) {
+    const lines = source.replace(/\r\n?/g, "\n").split("\n");
+    const fragment = document.createDocumentFragment();
+    let index = 0;
+    while (index < lines.length) {
+      const line = lines[index];
+      if (!line.trim()) {
+        index += 1;
+        continue;
+      }
+      const fence = line.match(/^```([\w-]*)\s*$/);
+      if (fence) {
+        index += 1;
+        const codeLines = [];
+        while (index < lines.length && !/^```\s*$/.test(lines[index])) {
+          codeLines.push(lines[index]);
+          index += 1;
+        }
+        if (index < lines.length) index += 1;
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = codeLines.join("\n");
+        if (fence[1]) code.dataset.language = fence[1];
+        pre.append(code);
+        fragment.append(pre);
+        continue;
+      }
+      const heading = line.match(/^(#{1,6})\s+(.+)$/);
+      if (heading) {
+        const element = document.createElement(`h${heading[1].length}`);
+        appendInline(element, heading[2]);
+        fragment.append(element);
+        index += 1;
+        continue;
+      }
+      if (/^ {0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+        fragment.append(document.createElement("hr"));
+        index += 1;
+        continue;
+      }
+      if (/^>\s?/.test(line)) {
+        const quoteLines = [];
+        while (index < lines.length && /^>\s?/.test(lines[index])) {
+          quoteLines.push(lines[index].replace(/^>\s?/, ""));
+          index += 1;
+        }
+        const quote = document.createElement("blockquote");
+        appendInline(quote, quoteLines.join(" "));
+        fragment.append(quote);
+        continue;
+      }
+      const listMatch = line.match(/^ {0,3}([-+*]|\d+\.)\s+(.+)$/);
+      if (listMatch) {
+        const ordered = /\d+\./.test(listMatch[1]);
+        const list = document.createElement(ordered ? "ol" : "ul");
+        while (index < lines.length) {
+          const itemMatch = lines[index].match(/^ {0,3}([-+*]|\d+\.)\s+(.+)$/);
+          if (!itemMatch || /\d+\./.test(itemMatch[1]) !== ordered) break;
+          const item = document.createElement("li");
+          appendInline(item, itemMatch[2]);
+          list.append(item);
+          index += 1;
+        }
+        fragment.append(list);
+        continue;
+      }
+      const paragraphLines = [line.trim()];
+      index += 1;
+      while (index < lines.length && lines[index].trim() && !isBlockStart(lines[index])) {
+        paragraphLines.push(lines[index].trim());
+        index += 1;
+      }
+      const paragraph = document.createElement("p");
+      appendInline(paragraph, paragraphLines.join(" "));
+      fragment.append(paragraph);
+    }
+    return fragment;
+  }
+
+  function render() {
+    const source = byId("markdown-input").value;
+    if (source.length > 500_000) {
+      setStatus("Keep Markdown below 500 KB for responsive previewing.", "error");
+      return;
+    }
+    const preview = byId("markdown-preview");
+    preview.replaceChildren(parseMarkdown(source));
+    byId("markdown-html").value = preview.innerHTML;
+    setStatus("Preview rendered without executing raw HTML. Check the result in the destination Markdown engine before publishing.", "success");
+  }
+
+  byId("render-markdown").addEventListener("click", render);
+  byId("markdown-sample").addEventListener("click", () => {
+    byId("markdown-input").value = "# Local-first publishing\n\n77 Toolkit keeps **source text visible** and renders a bounded subset.\n\n## Review checklist\n\n- Confirm the destination dialect\n- Inspect [every link](https://example.com/review)\n- Keep `<script>` tags as text\n\n> A preview is not a production sanitization policy.\n\n```js\nconst local = true;\n```\n";
+    render();
+  });
+  byId("markdown-clear").addEventListener("click", () => {
+    byId("markdown-input").value = "";
+    byId("markdown-preview").replaceChildren();
+    byId("markdown-html").value = "";
+    setStatus("");
+  });
+  byId("copy-markdown-html").addEventListener("click", () => copyText(byId("markdown-html").value));
+  byId("markdown-sample").click();
+}
+
 function renderUrlParser() {
   root.innerHTML = `
     <section class="tool-panel">
@@ -1533,10 +2191,15 @@ const renderers = {
   "regex-tester": renderRegex,
   "uuid-generator": renderUuid,
   "hash-generator": renderHash,
+  "xml-formatter": renderXmlFormatter,
+  "cron-inspector": renderCronInspector,
+  "password-generator": renderPasswordGenerator,
+  "date-calculator": renderDateCalculator,
   "text-diff": renderTextDiff,
   "case-converter": renderCaseConverter,
   "line-processor": renderLineProcessor,
   "word-counter": renderWordCounter,
+  "markdown-preview": renderMarkdownPreview,
   "image-compressor": () => renderImageTransform("compressor"),
   "image-resizer": () => renderImageTransform("resizer"),
   "image-converter": () => renderImageTransform("converter"),

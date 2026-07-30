@@ -34,6 +34,10 @@ private, inexpensive to host, and require little maintenance.
 - Regex Tester
 - UUID Generator
 - Hash Generator using the browser Web Crypto API
+- XML Formatter
+- Cron Expression Inspector
+- Password Generator using browser cryptographic randomness
+- Date Calculator with date-only and weekday arithmetic
 
 ### Text
 
@@ -41,6 +45,7 @@ private, inexpensive to host, and require little maintenance.
 - Case Converter
 - Line Processor for sorting, trimming, numbering, and deduplication
 - Word Counter with sentence, character, frequency, and reading-time statistics
+- Markdown Preview with raw HTML disabled
 
 ### Image
 
