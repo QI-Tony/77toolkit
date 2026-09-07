@@ -17,7 +17,7 @@ services.
 
 The public catalog currently includes 29 tools across Developer, Text, Image,
 and Web categories, plus twelve original workflow guides. The production build
-creates 54 indexable pages with consistent metadata, navigation, AdSense
+creates 54 indexable pages with consistent metadata, navigation, advertising
 coverage, favicons, internal links, and sitemap dates. The original three apps
 keep their independent codebases; the newer small utilities share one
 accessible interface and browser runtime.
@@ -60,7 +60,7 @@ npm run build:all
 - [Deploy the unified site with Cloudflare Pages](docs/cloudflare-pages.md)
 - [Add backend features with Cloudflare Workers](docs/cloudflare-workers.md)
 - [Plan and add more tools](docs/adding-tools.md)
-- [Review AdSense and search readiness](docs/adsense-readiness.md)
+- [Review advertising and publisher readiness](docs/adsense-readiness.md)
 
 The four original repositories are unchanged. Their histories were imported
 into the corresponding `apps/*` directories.
