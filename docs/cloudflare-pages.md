@@ -22,7 +22,7 @@ dist/
     ├── image-compressor/index.html
     ├── json-fix/index.html
     ├── text-clean/index.html
-    └── ... 25 more tool routes
+    └── ... 28 more tool routes
 ```
 
 Use these Pages settings:

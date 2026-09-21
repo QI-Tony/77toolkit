@@ -1,4 +1,69 @@
 export const toolEditorial = {
+  "number-base": {
+    "scenarios": [
+      {
+        "title": "Database identifiers",
+        "text": "Translate a large decimal identifier into hexadecimal for a diagnostic report without losing low-order digits."
+      },
+      {
+        "title": "Protocol inspection",
+        "text": "Read a binary mask as a decimal or hexadecimal integer before checking individual bit positions in your protocol documentation."
+      }
+    ],
+    "review": "Confirm the source base first: the same digits can mean very different values in different bases. Round-trip the result with Swap bases when accuracy matters, and compare its normalized value with the original.",
+    "alternative": "Use a programmer calculator or a language library when fixed-width signed integers, bitwise operations, byte order, fractions, or overflow behavior are part of the question.",
+    "privacy": "Conversion runs in memory in the active tab. Integer identifiers can still identify users or internal records, so avoid including real account identifiers in public screenshots.",
+    "checklist": [
+      "Select the correct source alphabet.",
+      "Keep the original digit string.",
+      "Check whether a fixed width is required."
+    ],
+    "relatedGuides": []
+  },
+  "json-string": {
+    "scenarios": [
+      {
+        "title": "Multiline fixtures",
+        "text": "Represent a small multiline message as a single JSON string in a test fixture while retaining its line breaks after parsing."
+      },
+      {
+        "title": "Log inspection",
+        "text": "Decode a quoted string copied from a JSON log so embedded quotes and line breaks become readable again."
+      }
+    ],
+    "review": "Check whether the destination expects a full quoted string or only its contents. In a JSON document, use the complete encoded result once; encoding it a second time produces literal backslashes rather than the intended text.",
+    "alternative": "Use JSON Fix to repair a document, HTML Entity Encoder for markup text, or Base64 for a transport representation. None of these transformations substitutes for encryption.",
+    "privacy": "Strings are transformed only in the active browser tab and are not saved to local storage. Clear the text before sharing your screen if it contains request payloads or private messages.",
+    "checklist": [
+      "Choose the intended conversion direction.",
+      "Keep outer quotes when inserting a JSON value.",
+      "Avoid using JSON escaping in a different syntax context."
+    ],
+    "relatedGuides": [
+      "repair-invalid-json"
+    ]
+  },
+  "utm-builder": {
+    "scenarios": [
+      {
+        "title": "Newsletter links",
+        "text": "Label an email campaign consistently and distinguish the header link from a footer link using the optional content field."
+      },
+      {
+        "title": "Existing product links",
+        "text": "Add campaign labels to a product URL that already contains selection parameters without replacing those values or losing its fragment."
+      }
+    ],
+    "review": "Read the host and path as well as the campaign fields. Keep a consistent naming convention across the team, and check that none of the values contains personal information. Copying a link does not validate its destination.",
+    "alternative": "Use the campaign management system of your analytics platform when you need shared naming rules, link approval, attribution reports, or automatic short links. This tool provides local URL construction only.",
+    "privacy": "The URL is never fetched by this builder. Once shared or opened elsewhere, its query parameters may be visible in logs, history, and analytics, so they must not contain secrets or personal data.",
+    "checklist": [
+      "Confirm the destination host.",
+      "Review required and optional labels.",
+      "Test links separately before publication."
+    ],
+    "relatedGuides": []
+  },
   "json-fix": {
     scenarios: [
       { title: "Configuration recovery", text: "Repair a copied settings fragment with unquoted keys, single-quoted strings, or trailing commas before placing it back in a project." },

@@ -58,6 +58,87 @@ export const categoryContent = {
 };
 
 export const toolContent = {
+  "number-base": {
+    "intro": "Convert integer identifiers, bit masks, hexadecimal values, and binary examples without passing through floating-point arithmetic. Select any source and destination bases from 2 through 36. The input stays visible beside an exact, copyable result, including when the value is larger than the safe integer range of a JavaScript Number.",
+    "steps": [
+      "Enter the integer and select its source base. A matching 0b, 0o, or 0x prefix is optional for binary, octal, or hexadecimal.",
+      "Choose the destination base and select Convert. Invalid digits are rejected instead of silently truncated.",
+      "Copy the result or select Swap bases to convert a successful result back to its original base."
+    ],
+    "example": {
+      "input": "9007199254740993 (base 10)",
+      "output": "20000000000001 (base 16)"
+    },
+    "howItWorks": "Each digit is checked against the selected alphabet and accumulated using BigInt multiplication and addition. Output uses digits 0–9 followed by lowercase letters a–z. Leading zeroes and a positive sign are normalized away; a negative value keeps a leading minus sign.",
+    "limitations": [
+      "Only whole integers are supported. Decimal fractions, exponent notation, digit separators, and internal whitespace are rejected.",
+      "Negative values use signed magnitude text, not a fixed-width two’s complement representation. Input is limited to 4,096 digits."
+    ],
+    "faqs": [
+      {
+        "question": "Can I convert a 64-bit database ID?",
+        "answer": "Yes. Paste the original digit string directly. Do not first parse it as a JavaScript Number, because any precision already lost cannot be recovered by this tool."
+      },
+      {
+        "question": "Why did leading zeroes disappear?",
+        "answer": "The result represents a number rather than a fixed-width code. Add padding separately if a protocol requires a particular width; do not use this tool to preserve identifier formatting."
+      }
+    ]
+  },
+  "json-string": {
+    "intro": "Turn multiline text into a quoted JSON string for fixtures, configuration values, and request examples. The reverse operation reads a complete JSON string literal and restores its text, including newlines, quotes, backslashes, and Unicode. This tool handles one string rather than repairing or formatting an entire JSON document.",
+    "steps": [
+      "Select Text → JSON string to escape plain text, or JSON string → Text to decode a string literal.",
+      "Paste the input. Decoding requires the surrounding double quotes; encoding accepts empty text as a valid empty string.",
+      "Select Convert, review the result, and copy it into the appropriate string field in your document."
+    ],
+    "example": {
+      "input": "Hello \"77\" followed by a newline",
+      "output": "\"Hello \\\"77\\\"\\n\""
+    },
+    "howItWorks": "Encoding uses JSON.stringify on the input string. Decoding uses JSON.parse and then verifies that the parsed value is actually a string. Objects, arrays, numbers, booleans, and null are rejected even though they may be valid JSON. No code is evaluated.",
+    "limitations": [
+      "JSON escaping does not make text safe for HTML, inline script tags, SQL, or shell commands. Use the escaping rules of the destination context.",
+      "A single operation accepts up to one million UTF-16 code units. Escaped newlines become actual line breaks in decoded output."
+    ],
+    "faqs": [
+      {
+        "question": "Will Chinese text and emoji survive?",
+        "answer": "Yes. JSON supports Unicode strings, and ordinary non-ASCII characters remain readable. Control characters, quotes, and backslashes receive the escaping required by JSON."
+      },
+      {
+        "question": "Why is my object rejected?",
+        "answer": "Unescape expects a single JSON string such as \"hello\", not an object such as {\"message\":\"hello\"}. Use JSON Fix for complete documents that need repair or formatting."
+      }
+    ]
+  },
+  "utm-builder": {
+    "intro": "Create a campaign link for a newsletter, social post, or other channel without editing query punctuation by hand. The builder keeps unrelated query parameters and the URL fragment while replacing the five standard UTM fields with your chosen values. It does not contact the destination or send campaign information to an analytics service.",
+    "steps": [
+      "Paste an absolute HTTP or HTTPS destination URL. Remove any embedded username or password before using it.",
+      "Enter source, medium, and campaign. Add term or content when you need to distinguish keywords or placements.",
+      "Select Build URL, inspect the complete result, and copy it. Test the destination yourself before publishing the link."
+    ],
+    "example": {
+      "input": "https://example.com/?plan=team + newsletter / email / launch",
+      "output": "https://example.com/?plan=team&utm_source=newsletter&utm_medium=email&utm_campaign=launch"
+    },
+    "howItWorks": "The browser URL parser separates the path, query, and fragment. URLSearchParams encodes campaign values, replaces repeated standard UTM fields, and removes optional term or content fields left blank. Other query values remain present, although their serialized encoding may be normalized by the browser.",
+    "limitations": [
+      "The tool does not verify that the destination exists, accepts these parameters, or records campaign attribution.",
+      "Values are case-sensitive in many reporting workflows. Existing signed URLs may break when query serialization changes, even if their parameter values are preserved."
+    ],
+    "faqs": [
+      {
+        "question": "Does this install analytics or track visitors?",
+        "answer": "No. It only constructs text locally. Whether a later visit records attribution depends on the destination website and its analytics setup."
+      },
+      {
+        "question": "Can I include spaces or Chinese text?",
+        "answer": "Yes. Provide ordinary text and the browser encodes it as query data. Do not pre-encode values: a literal percent sign would itself be encoded again."
+      }
+    ]
+  },
   "json-fix": {
     intro: "JSON Fix is for configuration fragments, API responses, and copied objects that are almost valid JSON but fail to parse. It repairs common punctuation and quoting problems, then formats the result so changes are easy to inspect.",
     steps: [

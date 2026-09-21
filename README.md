@@ -12,13 +12,13 @@ services.
 | `apps/color-spectrum` | `77toolkit.com/tools/color-spectrum/` | Extract and analyze colors from images |
 | `apps/json-fix` | `77toolkit.com/tools/json-fix/` | Repair and format malformed JSON |
 | `apps/text-clean` | `77toolkit.com/tools/text-clean/` | Remove formatting from copied text |
-| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 26 focused tools |
+| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 29 focused tools |
 | `workers/api` | `api.77toolkit.com` | Optional shared backend for future tools |
 
-The public catalog currently includes 29 tools across Developer, Text, Image,
+The public catalog currently includes 32 tools across Developer, Text, Image,
 and Web categories, plus twelve original workflow guides. The production build
-creates 54 indexable pages with consistent metadata, navigation, advertising
-coverage, favicons, internal links, and sitemap dates. The original three apps
+creates 57 indexable pages with consistent metadata, navigation, favicons,
+internal links, and sitemap dates. The original three apps
 keep their independent codebases; the newer small utilities share one
 accessible interface and browser runtime.
 
@@ -60,7 +60,20 @@ npm run build:all
 - [Deploy the unified site with Cloudflare Pages](docs/cloudflare-pages.md)
 - [Add backend features with Cloudflare Workers](docs/cloudflare-workers.md)
 - [Plan and add more tools](docs/adding-tools.md)
-- [Review advertising and publisher readiness](docs/adsense-readiness.md)
+- [Ad-free behavior and verification](docs/ad-free.md)
 
 The four original repositories are unchanged. Their histories were imported
 into the corresponding `apps/*` directories.
+
+## Recent improvements
+
+- Exact integer conversion across bases 2–36, JSON string escaping and decoding,
+  and a local UTM campaign URL builder.
+- Multi-word catalog search, bookmarkable filters, keyboard shortcuts (`/` to
+  focus search, `Esc` to clear), and favorites stored only in this browser.
+- No advertising network scripts or publisher authorization files. The build
+  rejects known ad integrations in generated HTML and JavaScript.
+
+Run `npm test` for conversion and ad-regression checks, then `npm run build:all`
+for the complete site and Worker dry-run build. GitHub Actions runs both checks
+on pull requests and pushes to `main`.

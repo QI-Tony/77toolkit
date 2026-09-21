@@ -21,7 +21,8 @@
     "build:text": "npm run build --workspace=@77toolkit/text-clean",
     "build:api": "npm run build --workspace=@77toolkit/api",
     "preview": "vite preview --outDir dist",
-    "deploy:api": "npm run deploy --workspace=@77toolkit/api"
+    "deploy:api": "npm run deploy --workspace=@77toolkit/api",
+    "test": "node --test tests/*.test.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -8,8 +8,10 @@ Small local-first utilities should use the shared tool runtime:
 3. Add task-specific scenarios, review advice, alternatives, privacy notes,
    and a checklist to `apps/browser-tools/editorial.mjs`.
 4. Add a renderer to `apps/browser-tools/shared/app.js`.
-5. Register the renderer by slug at the bottom of that file.
-6. Run `npm run build`; the root build creates its page, canonical URL,
+5. Put independently testable transformations in `apps/browser-tools/shared/utilities.mjs`
+   and add boundary and invalid-input tests under `tests/`.
+6. Register the renderer by slug at the bottom of that file.
+7. Run `npm test` and `npm run build`; the root build creates its page, canonical URL,
    redirect, sitemap entry, homepage card, and related-tool links.
 
 Long-form editorial articles live in `apps/browser-tools/guides.mjs`. A guide
@@ -27,7 +29,8 @@ private, inexpensive to host, and require little maintenance.
 
 ### Developer
 
-- JSON Fix and JSON Diff
+- JSON Fix, JSON Diff, and JSON String Escaper
+- Number Base Converter using exact BigInt arithmetic
 - Timestamp Converter
 - JWT Decoder with an explicit no-verification warning
 - Base64 Encoder
@@ -57,7 +60,7 @@ private, inexpensive to host, and require little maintenance.
 
 ### Web
 
-- URL Parser and URL Encoder
+- URL Parser, URL Encoder, and UTM Link Builder
 - CSV ↔ JSON Converter
 - HTML Entity Encoder
 - CSS Unit Converter

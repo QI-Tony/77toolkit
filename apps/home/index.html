@@ -15,12 +15,12 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="77 Toolkit">
     <meta property="og:title" content="77 Toolkit — Local-first browser utilities">
-    <meta property="og:description" content="Twenty-nine focused utilities for developer data, text, images, and web work.">
+    <meta property="og:description" content="Thirty-two focused utilities for developer data, text, images, and web work.">
     <meta property="og:url" content="https://77toolkit.com/">
     <meta property="og:image" content="https://77toolkit.com/og.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="77 Toolkit — Local-first browser utilities">
-    <meta name="twitter:description" content="Twenty-nine focused utilities for developer data, text, images, and web work.">
+    <meta name="twitter:description" content="Thirty-two focused utilities for developer data, text, images, and web work.">
     <meta name="twitter:image" content="https://77toolkit.com/og.png">
     <script type="application/ld+json">
       {
@@ -60,11 +60,11 @@
     <main>
       <section class="intro" aria-labelledby="page-title">
         <div>
-          <p class="eyebrow">Browser-based utilities</p>
+          <p class="eyebrow">Ad-free · Local · No account needed</p>
           <h1 id="page-title">Tools for everyday digital work</h1>
         </div>
         <p class="intro-text">
-          Twenty-nine focused utilities for developer data, text, images, XML,
+          Thirty-two focused utilities for developer data, text, images, XML,
           schedules, Markdown, dates, URLs, CSV, HTML, and CSS. Tools process
           input in this browser and do not upload it to a 77 Toolkit server.
         </p>
@@ -73,20 +73,23 @@
       <section class="tools-section" id="tools" aria-labelledby="tools-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">29 tools · 4 categories</p>
+            <p class="eyebrow">32 tools · 4 categories</p>
             <h2 id="tools-title">Choose a tool</h2>
           </div>
           <p>Search the full collection or browse by category.</p>
         </div>
-        <div class="tool-controls">
+        <div class="tool-controls" hidden>
           <label class="search-box">
             <span class="visually-hidden">Search tools</span>
-            <input id="tool-search" type="search" placeholder="Search tools, tasks, or formats…" autocomplete="off">
+            <input id="tool-search" type="search" placeholder="Search tools, tasks, or formats…" autocomplete="off" aria-describedby="search-hint">
           </label>
-          <div class="category-filters" id="category-filters" aria-label="Filter tools"></div>
+          <div class="category-filters" id="category-filters" role="group" aria-label="Filter tools"></div>
+          <button id="favorites-filter" class="filter-button" type="button" aria-pressed="false">★ Favorites (0)</button>
         </div>
-        <div id="tool-catalog" aria-live="polite"><!-- TOOL_CATALOG_START --><!-- TOOL_CATALOG_END --></div>
-        <p class="empty-state" id="empty-state" hidden>No tools match that search.</p>
+        <div class="catalog-summary" hidden><p id="result-count" role="status" aria-live="polite"></p><p id="search-hint">Press <kbd>/</kbd> to search · <kbd>Esc</kbd> to clear</p><button id="reset-filters" class="filter-button" type="button">Reset filters</button></div>
+        <p id="storage-notice" role="status" hidden>Browser storage is unavailable or unreadable. Favorites may only last for this page.</p>
+        <div id="tool-catalog"><!-- TOOL_CATALOG_START --><!-- TOOL_CATALOG_END --></div>
+        <p class="empty-state" id="empty-state" hidden>No matching tools. Try fewer search words, another category, or reset filters to leave the favorites view.</p>
       </section>
 
       <section class="guides-section" aria-labelledby="guides-title">
@@ -149,7 +152,5 @@
     </footer>
 
     <script type="module" src="script.js"></script>
-    <script src="https://pl31227992.profitableratecpmnetwork.com/73/ef/51/73ef51cc952b9357951824c05b8a5c29.js"></script>
-    <script src="https://pl31227993.profitableratecpmnetwork.com/e8/0c/f4/e80cf4e5014c8492739d4b636100e786.js"></script>
   </body>
 </html>

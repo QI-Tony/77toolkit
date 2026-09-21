@@ -1,3 +1,5 @@
+import { convertInteger, convertJsonString, buildCampaignUrl } from "./utilities.mjs";
+
 const root = document.querySelector("#tool-root");
 const configNode = document.querySelector("#tool-config");
 const config = configNode ? JSON.parse(configNode.textContent) : null;
@@ -2183,7 +2185,113 @@ function renderContrast() {
   update();
 }
 
+function renderNumberBase() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Convert an integer</h2><p>Exact conversion with BigInt, including values larger than JavaScript's safe integer range.</p></div></div>
+      <label class="field"><span>Input integer</span><textarea class="compact-output" id="base-input" spellcheck="false" placeholder="9007199254740993"></textarea></label>
+      <div class="control-grid">
+        <label class="field"><span>From base (2–36)</span><input id="base-from" type="number" min="2" max="36" step="1" value="10"></label>
+        <label class="field"><span>To base (2–36)</span><input id="base-to" type="number" min="2" max="36" step="1" value="16"></label>
+      </div>
+      <div class="toolbar"><button class="button button-primary" id="base-convert" type="button">Convert</button><button class="button" id="base-swap" type="button">Swap bases</button><button class="button" id="base-example" type="button">Load example</button><button class="button" id="base-clear" type="button">Clear</button></div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+      <label class="field"><span>Converted integer</span><textarea class="compact-output" id="base-output" readonly></textarea></label>
+      <div class="toolbar"><button class="button" id="base-copy" type="button" disabled>Copy result</button></div>
+      <p class="help-text">Integers only; negative values use a minus sign, not two’s complement. Matching 0b, 0o, and 0x prefixes are accepted.</p>
+    </section>`;
+  const invalidate = () => { byId("base-output").value = ""; byId("base-copy").disabled = true; setStatus(""); };
+  const run = () => {
+    invalidate();
+    try {
+      byId("base-output").value = convertInteger(byId("base-input").value, Number(byId("base-from").value), Number(byId("base-to").value));
+      byId("base-copy").disabled = false;
+      setStatus("Converted exactly. Leading zeroes are removed.", "success");
+    } catch (error) { setStatus(error.message, "error"); }
+  };
+  ["base-input", "base-from", "base-to"].forEach((id) => byId(id).addEventListener("input", invalidate));
+  byId("base-convert").addEventListener("click", run);
+  byId("base-swap").addEventListener("click", () => {
+    const output = byId("base-output").value;
+    [byId("base-from").value, byId("base-to").value] = [byId("base-to").value, byId("base-from").value];
+    if (output) byId("base-input").value = output;
+    invalidate();
+    if (output) run();
+  });
+  byId("base-example").addEventListener("click", () => {
+    byId("base-input").value = "9007199254740993";
+    byId("base-from").value = "10"; byId("base-to").value = "16"; run();
+  });
+  byId("base-clear").addEventListener("click", () => { byId("base-input").value = ""; invalidate(); byId("base-input").focus(); });
+  byId("base-copy").addEventListener("click", () => copyText(byId("base-output").value));
+}
+
+function renderJsonString() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Escape or restore a JSON string</h2><p>Escape includes the surrounding double quotes. Unescape requires one complete JSON string literal.</p></div></div>
+      <label class="field"><span>Operation</span><select id="string-mode"><option value="escape">Text → JSON string</option><option value="unescape">JSON string → Text</option></select></label>
+      <div class="input-grid"><label class="field"><span>Input</span><textarea id="string-input" spellcheck="false"></textarea></label><label class="field"><span>Result</span><textarea id="string-output" readonly></textarea></label></div>
+      <div class="toolbar"><button class="button button-primary" id="string-convert" type="button">Convert</button><button class="button" id="string-example" type="button">Load example</button><button class="button" id="string-clear" type="button">Clear</button><button class="button" id="string-copy" type="button" disabled>Copy result</button></div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+    </section>`;
+  const invalidate = () => { byId("string-output").value = ""; byId("string-copy").disabled = true; setStatus(""); };
+  const run = () => {
+    invalidate();
+    try {
+      byId("string-output").value = convertJsonString(byId("string-input").value, byId("string-mode").value);
+      byId("string-copy").disabled = false;
+      setStatus("Converted. JSON escaping is not HTML escaping or encryption.", "success");
+    } catch (error) { setStatus(error.message, "error"); }
+  };
+  byId("string-input").addEventListener("input", invalidate);
+  byId("string-mode").addEventListener("change", invalidate);
+  byId("string-convert").addEventListener("click", run);
+  byId("string-example").addEventListener("click", () => {
+    const example = 'Hello "77 Toolkit"!\n你好 👋';
+    byId("string-input").value = byId("string-mode").value === "escape" ? example : JSON.stringify(example); run();
+  });
+  byId("string-clear").addEventListener("click", () => { byId("string-input").value = ""; invalidate(); byId("string-input").focus(); });
+  byId("string-copy").addEventListener("click", () => copyText(byId("string-output").value));
+}
+
+function renderUtmBuilder() {
+  root.innerHTML = `
+    <section class="tool-panel">
+      <div class="panel-heading"><div><h2>Build a campaign link</h2><p>Existing non-UTM query parameters and the fragment are preserved. No link is fetched or opened.</p></div></div>
+      <label class="field"><span>Destination URL</span><input id="utm-url" type="url" placeholder="https://example.com/pricing?plan=team#faq"></label>
+      <div class="control-grid">${["source", "medium", "campaign", "term", "content"].map((key) => `<label class="field"><span>${key[0].toUpperCase() + key.slice(1)} ${["term", "content"].includes(key) ? "(optional)" : "(required)"}</span><input id="utm-${key}" type="text" ${["term", "content"].includes(key) ? "" : "required"}></label>`).join("")}</div>
+      <div class="toolbar"><button class="button button-primary" id="utm-build" type="button">Build URL</button><button class="button" id="utm-example" type="button">Load example</button><button class="button" id="utm-clear" type="button">Clear</button></div>
+      <p class="status-message" id="tool-status" aria-live="polite"></p>
+      <label class="field"><span>Campaign URL</span><textarea class="compact-output" id="utm-output" readonly></textarea></label>
+      <div class="toolbar"><button class="button" id="utm-copy" type="button" disabled>Copy URL</button></div>
+      <p class="help-text">The five standard UTM fields are replaced; blank optional fields are removed. URLs are public: never add passwords or personal information.</p>
+    </section>`;
+  const keys = ["source", "medium", "campaign", "term", "content"];
+  const invalidate = () => { byId("utm-output").value = ""; byId("utm-copy").disabled = true; setStatus(""); };
+  const run = () => {
+    invalidate();
+    try {
+      const fields = Object.fromEntries(keys.map((key) => [key, byId(`utm-${key}`).value]));
+      byId("utm-output").value = buildCampaignUrl(byId("utm-url").value, fields);
+      byId("utm-copy").disabled = false;
+      setStatus("Campaign URL ready. Check the destination before sharing.", "success");
+    } catch (error) { setStatus(error.message, "error"); }
+  };
+  ["url", ...keys].forEach((key) => byId(`utm-${key}`).addEventListener("input", invalidate));
+  byId("utm-build").addEventListener("click", run);
+  byId("utm-example").addEventListener("click", () => {
+    const values = { url: "https://example.com/pricing?plan=team#faq", source: "newsletter", medium: "email", campaign: "autumn launch", term: "", content: "header" };
+    Object.entries(values).forEach(([key, value]) => { byId(`utm-${key}`).value = value; }); run();
+  });
+  byId("utm-clear").addEventListener("click", () => { ["url", ...keys].forEach((key) => { byId(`utm-${key}`).value = ""; }); invalidate(); byId("utm-url").focus(); });
+  byId("utm-copy").addEventListener("click", () => copyText(byId("utm-output").value));
+}
+
 const renderers = {
+  "number-base": renderNumberBase,
+  "json-string": renderJsonString,
+  "utm-builder": renderUtmBuilder,
   "json-diff": renderJsonDiff,
   timestamp: renderTimestamp,
   "jwt-decoder": renderJwt,

@@ -269,6 +269,7 @@ h1 {
 
 textarea,
 input[type="text"],
+input[type="url"],
 input[type="number"],
 input[type="date"],
 input[type="datetime-local"],
@@ -295,6 +296,7 @@ textarea,
 }
 
 input[type="text"],
+input[type="url"],
 input[type="number"],
 input[type="date"],
 input[type="datetime-local"],
@@ -888,3 +890,7 @@ mark {
     margin-top: 5px;
   }
 }
+
+textarea.compact-output { min-height: 110px; }
+.help-text { margin: 14px 0 0; color: var(--muted); font-size: .85rem; }
+.field + .control-grid { margin-top: 14px; }

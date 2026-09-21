@@ -1,5 +1,41 @@
 export const toolCatalog = [
   {
+    "slug": "number-base",
+    "name": "Number Base Converter",
+    "category": "Developer",
+    "tags": [
+      "Binary",
+      "Hex",
+      "BigInt"
+    ],
+    "description": "Convert integers exactly between bases 2\u201336, even beyond the safe integer range.",
+    "implementation": "shared"
+  },
+  {
+    "slug": "json-string",
+    "name": "JSON String Escaper",
+    "category": "Developer",
+    "tags": [
+      "Escape",
+      "Unescape",
+      "Unicode"
+    ],
+    "description": "Escape plain text as a JSON string or restore a quoted JSON string to readable text.",
+    "implementation": "shared"
+  },
+  {
+    "slug": "utm-builder",
+    "name": "UTM Link Builder",
+    "category": "Web",
+    "tags": [
+      "Campaign",
+      "URL",
+      "Marketing"
+    ],
+    "description": "Build campaign URLs with encoded UTM parameters while preserving existing query values.",
+    "implementation": "shared"
+  },
+  {
     slug: "json-fix",
     name: "JSON Fix",
     category: "Developer",
