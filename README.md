@@ -61,6 +61,7 @@ npm run build:all
 - [Add backend features with Cloudflare Workers](docs/cloudflare-workers.md)
 - [Plan and add more tools](docs/adding-tools.md)
 - [Ad-free behavior and verification](docs/ad-free.md)
+- [Search metadata, discovery, and validation](docs/search-and-discovery.md)
 
 The four original repositories are unchanged. Their histories were imported
 into the corresponding `apps/*` directories.
@@ -77,3 +78,8 @@ into the corresponding `apps/*` directories.
 Run `npm test` for conversion and ad-regression checks, then `npm run build:all`
 for the complete site and Worker dry-run build. GitHub Actions runs both checks
 on pull requests and pushes to `main`.
+
+Search titles and descriptions are managed centrally for all tool pages. The
+homepage highlights six concrete tasks, and every tool offers relevant next
+steps. Guides have a table of contents and a direct tool link. Build validation
+checks canonical URLs, unique metadata, social previews, and sitemap coverage.

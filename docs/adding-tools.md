@@ -11,7 +11,9 @@ Small local-first utilities should use the shared tool runtime:
 5. Put independently testable transformations in `apps/browser-tools/shared/utilities.mjs`
    and add boundary and invalid-input tests under `tests/`.
 6. Register the renderer by slug at the bottom of that file.
-7. Run `npm test` and `npm run build`; the root build creates its page, canonical URL,
+7. Add three relevant next steps in `apps/browser-tools/discovery.mjs` and
+   review the generated title and description in `apps/browser-tools/seo.mjs`.
+8. Run `npm test` and `npm run build`; the root build creates its page, canonical URL,
    redirect, sitemap entry, homepage card, and related-tool links.
 
 Long-form editorial articles live in `apps/browser-tools/guides.mjs`. A guide

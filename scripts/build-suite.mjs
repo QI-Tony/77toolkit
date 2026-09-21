@@ -7,6 +7,9 @@ import { toolCatalog } from "../apps/browser-tools/catalog.mjs";
 import { categoryContent, toolContent } from "../apps/browser-tools/content.mjs";
 import { toolEditorial } from "../apps/browser-tools/editorial.mjs";
 import { assertAdFreeOutput } from "./validate-ad-free.mjs";
+import { featuredGuideSlugs, getRelatedTools } from "../apps/browser-tools/discovery.mjs";
+import { applyPageMetadata, getToolMetadata } from "../apps/browser-tools/seo.mjs";
+import { assertSearchOutput } from "./validate-search.mjs";
 import { guideCatalog } from "../apps/browser-tools/guides.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -224,7 +227,7 @@ function createToolStructuredData(tool) {
         "@type": "WebApplication",
         name: tool.name,
         url: `https://77toolkit.com/tools/${tool.slug}/`,
-        description: tool.description,
+        description: getToolMetadata(tool).description,
         applicationCategory: `${tool.category}Application`,
         operatingSystem: "Any",
         browserRequirements: "Requires JavaScript and a modern web browser",
@@ -268,12 +271,16 @@ function createHomeCatalogMarkup() {
     .join("");
 }
 
-function createGuideCard(guide) {
-  return `<a class="guide-card" href="/guides/${escapeHtml(guide.slug)}/"><div><span>${escapeHtml(guide.kicker)}</span><h2>${escapeHtml(guide.title)}</h2><p>${escapeHtml(guide.description)}</p></div><small>${escapeHtml(guide.readingTime)} · Read guide →</small></a>`;
+function createGuideCard(guide, heading = "h2") {
+  return `<a class="guide-card" href="/guides/${escapeHtml(guide.slug)}/"><div><span>${escapeHtml(guide.kicker)}</span><${heading}>${escapeHtml(guide.title)}</${heading}><p>${escapeHtml(guide.description)}</p></div><small>${escapeHtml(guide.readingTime)} · Read guide →</small></a>`;
 }
 
 function createHomeGuideMarkup() {
-  return guideCatalog.slice(0, 3).map(createGuideCard).join("");
+  return featuredGuideSlugs.map((slug) => {
+    const guide = guideCatalog.find((candidate) => candidate.slug === slug);
+    if (!guide) throw new Error(`Unknown featured guide ${slug}.`);
+    return createGuideCard(guide, "h3");
+  }).join("");
 }
 
 function createArticleStructuredData(guide) {
@@ -309,14 +316,14 @@ function createGuideIndexPage() {
     slug: "guides",
     title: "Practical Guides",
     description: "Original guides for repairing developer data, handling tokens safely, preparing images, testing patterns, and improving accessibility.",
-    body: `<header class="static-hero guide-index-hero"><p class="static-eyebrow">Editorial library</p><h1>Understand the work behind the tool</h1><p>These guides explain decisions, limitations, and review steps that a one-click result cannot settle on its own.</p></header><div class="category-copy"><p>Each article is written around a real workflow and links to the relevant local browser tools. The goal is not to add filler around a utility, but to show when an operation is appropriate, what can go wrong, and how to verify the output.</p></div><section class="guide-grid" aria-label="All practical guides">${guideCatalog.map(createGuideCard).join("")}</section>`,
+    body: `<header class="static-hero guide-index-hero"><p class="static-eyebrow">Editorial library</p><h1>Understand the work behind the tool</h1><p>These guides explain decisions, limitations, and review steps that a one-click result cannot settle on its own.</p></header><div class="category-copy"><p>Each article is written around a real workflow and links to the relevant local browser tools. The goal is not to add filler around a utility, but to show when an operation is appropriate, what can go wrong, and how to verify the output.</p></div><section class="guide-grid" aria-label="All practical guides">${guideCatalog.map((guide) => createGuideCard(guide)).join("")}</section>`,
   });
 }
 
 function createGuidePage(guide) {
   const sections = guide.sections
     .map(
-      (section) => `<section><h2>${escapeHtml(section.heading)}</h2>${section.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}${section.bullets ? `<ul>${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}</section>`,
+      (section, index) => `<section id="guide-section-${index + 1}"><h2>${escapeHtml(section.heading)}</h2>${section.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}${section.bullets ? `<ul>${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}</section>`,
     )
     .join("");
   const relatedTools = guide.relatedTools
@@ -327,6 +334,9 @@ function createGuidePage(guide) {
     })
     .map((tool) => `<a href="/tools/${escapeHtml(tool.slug)}/"><strong>${escapeHtml(tool.name)}</strong><span>${escapeHtml(tool.description)}</span></a>`)
     .join("");
+  const startTool = toolCatalog.find((tool) => tool.slug === guide.relatedTools[0]);
+  const startLink = startTool ? `<a class="guide-start" href="/tools/${escapeHtml(startTool.slug)}/">Open ${escapeHtml(startTool.name)} <span aria-hidden="true">→</span></a>` : "";
+  const contents = `<nav class="guide-contents" aria-label="In this guide"><strong>In this guide</strong><ol>${guide.sections.map((section, index) => `<li><a href="#guide-section-${index + 1}">${escapeHtml(section.heading)}</a></li>`).join("")}</ol></nav>`;
   const resources = guide.resources
     .map((resource) => `<li><a href="${escapeHtml(resource.url)}" rel="noreferrer">${escapeHtml(resource.label)}</a></li>`)
     .join("");
@@ -337,7 +347,7 @@ function createGuidePage(guide) {
     description: guide.description,
     canonicalPath: `/guides/${guide.slug}/`,
     structuredData: createArticleStructuredData(guide),
-    body: `<article class="guide-article"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">77 Toolkit</a><span>/</span><a href="/guides/">Guides</a><span>/</span><span>${escapeHtml(guide.title)}</span></nav><header class="guide-hero"><p class="static-eyebrow">${escapeHtml(guide.kicker)}</p><h1>${escapeHtml(guide.title)}</h1><p>${escapeHtml(guide.description)}</p><div class="guide-meta"><span>${escapeHtml(guide.readingTime)}</span><span>By the 77 Toolkit maintainer</span><span>Published ${escapeHtml(guide.published)}</span><span>Updated ${escapeHtml(guide.updated)}</span><a href="/editorial-policy/">How guides are reviewed</a></div></header><div class="guide-layout"><div class="guide-body">${sections}<aside class="guide-takeaway"><strong>Key takeaway</strong><p>${escapeHtml(guide.takeaway)}</p></aside><section class="guide-resources"><h2>Primary references</h2><ul>${resources}</ul></section></div><aside class="guide-sidebar"><p class="publisher-content__eyebrow">Use the related tools</p><div>${relatedTools}</div><a class="guide-all-link" href="/guides/">Browse all guides →</a></aside></div></article>`,
+    body: `<article class="guide-article"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">77 Toolkit</a><span>/</span><a href="/guides/">Guides</a><span>/</span><span>${escapeHtml(guide.title)}</span></nav><header class="guide-hero"><p class="static-eyebrow">${escapeHtml(guide.kicker)}</p><h1>${escapeHtml(guide.title)}</h1><p>${escapeHtml(guide.description)}</p><div class="guide-meta"><span>${escapeHtml(guide.readingTime)}</span><span>By the 77 Toolkit maintainer</span><span>Published ${escapeHtml(guide.published)}</span><span>Updated ${escapeHtml(guide.updated)}</span><a href="/editorial-policy/">How guides are reviewed</a></div>${startLink}</header><div class="guide-layout"><div class="guide-body">${contents}${sections}<aside class="guide-takeaway"><strong>Key takeaway</strong><p>${escapeHtml(guide.takeaway)}</p></aside><section class="guide-resources"><h2>Primary references</h2><ul>${resources}</ul></section></div><aside class="guide-sidebar"><p class="publisher-content__eyebrow">Use the related tools</p><div>${relatedTools}</div><a class="guide-all-link" href="/guides/">Browse all guides →</a></aside></div></article>`,
   });
 }
 
@@ -561,12 +571,12 @@ function injectExistingToolContent(html, tool) {
     <link rel="stylesheet" href="${sharedAssets.content}">
     <script type="application/ld+json">${createToolStructuredData(tool)}</script>`;
   let result = html.replace("</head>", `${headContent}\n  </head>`);
-  const article = `${createPublisherContent(tool)}\n`;
+  const article = `${createRelatedTools(tool)}\n${createPublisherContent(tool)}\n`;
 
   if (result.includes('<div id="app"></div>')) {
     result = result.replace(
       '<div id="app"></div>',
-      `<div id="app"></div>\n${article}${createLegalFooter()}`,
+      `<div id="app"><noscript><section class="publisher-content"><h1>${escapeHtml(tool.name)}</h1><p>Enable JavaScript to use this tool locally. You can still read the guide below or <a href="/">browse all tools</a>.</p></section></noscript></div>\n${article}${createLegalFooter()}`,
     );
   } else if (result.includes("</main>")) {
     result = result.replace("</main>", `</main>\n${article}`);
@@ -580,25 +590,17 @@ function injectExistingToolContent(html, tool) {
     throw new Error(`Publisher content was inserted outside the body for ${tool.slug}.`);
   }
 
-  return result;
+  return applyPageMetadata(result, getToolMetadata(tool));
+}
+
+function createRelatedTools(tool) {
+  return `<section class="next-tools" aria-labelledby="next-tools-title"><h2 id="next-tools-title">Continue your work</h2><p>Choose a related tool for the next step. Each opens with a fresh workspace.</p><div class="next-tools-grid">${getRelatedTools(tool.slug).map((candidate) => `<a href="/tools/${escapeHtml(candidate.slug)}/"><strong>${escapeHtml(candidate.name)} <span aria-hidden="true">→</span></strong><span>${escapeHtml(candidate.description)}</span></a>`).join("")}</div></section>`;
 }
 
 function createToolPage(tool) {
-  const related = toolCatalog
-    .filter((candidate) => candidate.category === tool.category && candidate.slug !== tool.slug)
-    .slice(0, 3);
-  const relatedCards = related
-    .map(
-      (candidate) => `
-          <a class="related-card" href="/tools/${escapeHtml(candidate.slug)}/">
-            <strong>${escapeHtml(candidate.name)}</strong>
-            <span>${escapeHtml(candidate.description)}</span>
-          </a>`,
-    )
-    .join("");
   const config = JSON.stringify(tool).replaceAll("<", "\\u003c");
 
-  return `<!doctype html>
+  return applyPageMetadata(`<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -622,15 +624,15 @@ function createToolPage(tool) {
         <aside class="privacy-note"><strong>Private by default</strong>Your text, tokens, files, and images stay in this browser tab.</aside>
       </section>
       <div class="workspace" id="tool-root"><noscript><section class="tool-panel"><p>This tool requires JavaScript to run locally in your browser.</p></section></noscript></div>
+      ${createRelatedTools(tool)}
       ${createPublisherContent(tool)}
-      <section class="related-section" aria-labelledby="related-title"><h2 id="related-title">More ${escapeHtml(tool.category)} tools</h2><div class="related-grid">${relatedCards}</div></section>
     </main>
     ${createLegalFooter()}
     <script id="tool-config" type="application/json">${config}</script>
     <script type="module" src="${sharedAssets.app}"></script>
   </body>
 </html>
-`;
+`, getToolMetadata(tool));
 }
 
 await rm(outputRoot, { recursive: true, force: true });
@@ -738,7 +740,7 @@ await writeFile(
   path.join(outputRoot, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapPaths.map((sitePath) => `  <url><loc>https://77toolkit.com${sitePath}</loc><lastmod>${siteUpdated}</lastmod></url>`).join("\n")}
+${sitemapPaths.map((sitePath) => `  <url><loc>https://77toolkit.com${sitePath}</loc><lastmod>${guideCatalog.find((guide) => sitePath === `/guides/${guide.slug}/`)?.updated || siteUpdated}</lastmod></url>`).join("\n")}
 </urlset>
 `,
 );
@@ -749,5 +751,6 @@ await writeFile(
 );
 
 await validateBuildOutput();
+await assertSearchOutput(outputRoot, sitemapPaths);
 
 console.log(`\nUnified Pages output created in dist/ with ${toolCatalog.length} tools, ${guideCatalog.length} guides, and ${sitemapPaths.length} indexed pages.`);
