@@ -15,12 +15,12 @@ services.
 | `apps/color-spectrum` | `77toolkit.com/tools/color-spectrum/` | Extract and analyze colors from images |
 | `apps/json-fix` | `77toolkit.com/tools/json-fix/` | Repair and format malformed JSON |
 | `apps/text-clean` | `77toolkit.com/tools/text-clean/` | Remove formatting from copied text |
-| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 29 focused tools |
+| `apps/browser-tools` | `77toolkit.com/tools/<tool>/` | Shared local-first runtime for 35 focused tools |
 | `workers/api` | `api.77toolkit.com` | Optional shared backend for future tools |
 
-The public catalog currently includes 32 tools across Developer, Text, Image,
-and Web categories, plus twelve original workflow guides. The production build
-creates 57 indexable pages with consistent metadata, navigation, favicons,
+The public catalog currently includes 38 tools across Developer, Text, Image,
+Web, and Research categories, plus twelve original workflow guides. The production build
+creates 64 indexable pages with consistent metadata, navigation, favicons,
 internal links, and sitemap dates. The original three apps
 keep their independent codebases; the newer small utilities share one
 accessible interface and browser runtime.
@@ -83,6 +83,6 @@ for the complete site and Worker dry-run build. GitHub Actions runs both checks
 on pull requests and pushes to `main`.
 
 Search titles and descriptions are managed centrally for all tool pages. The
-homepage highlights six concrete tasks, and every tool offers relevant next
+homepage highlights seven concrete tasks, and every tool offers relevant next
 steps. Guides have a table of contents and a direct tool link. Build validation
 checks canonical URLs, unique metadata, social previews, and sitemap coverage.

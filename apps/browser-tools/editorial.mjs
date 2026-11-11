@@ -1,4 +1,106 @@
 export const toolEditorial = {
+  "scientific-palette": {
+    "scenarios": [
+      {
+        "title": "Line charts with several conditions",
+        "text": "Preview the line chart with and without markers. If two lines converge in the grayscale view, make the group identities distinct using markers or dashes and use the same convention in the legend."
+      }
+    ],
+    "review": "Compare the plotted series and legend at the intended publication size. Pay particular attention to thin overlapping lines, tiny point markers, and very light colors near a white background.",
+    "alternative": "Use a physical proof or a color-managed publishing workflow to assess actual ink and paper. Check the final plot in the software where it will be published.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
+  "figure-dpi": {
+    "scenarios": [
+      {
+        "title": "Single-column versus full-width figures",
+        "text": "Compare the same image at the two placement widths. Use the final layout width to decide whether a new raster export is needed before submission."
+      }
+    ],
+    "review": "Check that the specified width refers to the full placed figure, including any margins the export already contains. Inspect the smallest text and strokes in the rendered paper.",
+    "alternative": "Use the plotting software's PDF or SVG export when your submission accepts vector artwork and the content consists primarily of text, paths, and symbols.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
+  "figure-panels": {
+    "scenarios": [
+      {
+        "title": "Assemble a figure for a draft",
+        "text": "Export each panel from its plotting script first. Assemble a preview so coauthors can review the ordering and compare the manuscript's references with the panel labels."
+      }
+    ],
+    "review": "Inspect the exported PNG at the final placement width. Verify panel order, labels, font legibility, and scale bars in the original images. Check effective DPI separately for the complete figure.",
+    "alternative": "Use a vector layout editor when the submission requires editable labels, layered artwork, or exact positioning of individual graphical elements.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
+  "research-csv": {
+    "scenarios": [
+      {
+        "title": "Validate a sample manifest",
+        "text": "Check that a manifest exported from a spreadsheet contains unique sample IDs and the expected group sizes. Investigate a duplicate before joining the manifest to instrument results."
+      }
+    ],
+    "review": "Confirm that missing-value conventions match the source dataset. Review any leading zeros in identifiers, verify field separators, and inspect results before passing them to downstream scripts.",
+    "alternative": "Use an analysis pipeline or a schema validation library when you need unit conversions, cross-table constraints, or repeatable checks as part of automated data ingestion.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
+  "sample-randomizer": {
+    "scenarios": [
+      {
+        "title": "Divide a set of benchmark samples",
+        "text": "Specify exact sizes for two evaluation groups and record the seed with your analysis notes. Keep the original ordered manifest so a collaborator can rerun the allocation."
+      }
+    ],
+    "review": "Verify that every expected ID appears once and that the counts match the plan. Inspect spreadsheet imports, especially IDs with leading zeros or characters that spreadsheet software treats specially.",
+    "alternative": "Use your study's approved randomization workflow when you need concealed allocation, block randomization, stratification, or regulated study records.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
+  "reference-cleaner": {
+    "scenarios": [
+      {
+        "title": "Merge bibliography exports",
+        "text": "Review duplicates after combining records from several sources. Compare the retained entry with later versions before dropping records that may contain fuller author or journal information."
+      }
+    ],
+    "review": "Open the cleaned file in your reference manager or document build and verify that all expected citations still resolve. Check conflicting keys even if duplicate DOI removal reduced the record count.",
+    "alternative": "Use a reference manager to merge fields, preserve links to attachments, resolve DOI metadata, or maintain a shared collection.",
+    "privacy": "Inputs are processed in the active browser tab. Downloaded results may contain unpublished data; choose where to store or share them.",
+    "checklist": [
+      "Keep the original source for comparison.",
+      "Review the result with the target workflow in mind.",
+      "Save a verified result with your project notes."
+    ],
+    "relatedGuides": []
+  },
   "number-base": {
     "scenarios": [
       {

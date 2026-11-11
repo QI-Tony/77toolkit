@@ -894,3 +894,13 @@ mark {
 textarea.compact-output { min-height: 110px; }
 .help-text { margin: 14px 0 0; color: var(--muted); font-size: .85rem; }
 .field + .control-grid { margin-top: 14px; }
+
+.research-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid #d9e1e7;
+}
+
+.research-canvas[hidden] { display: none; }

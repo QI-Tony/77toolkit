@@ -93,12 +93,15 @@ async function createFingerprintedSharedAssets() {
 
   for (const [key, fileName] of Object.entries({
     utilities: "utilities.mjs",
+    researchData: "research-data.mjs",
+    research: "research.mjs",
     app: "app.js",
     content: "content.css",
     styles: "styles.css",
   })) {
     let source = await readFile(path.join(sharedSourceRoot, fileName), "utf8");
-    if (key === "app") source = source.replace("./utilities.mjs", sharedAssets.utilities);
+    if (key === "research") source = source.replace("./research-data.mjs", sharedAssets.researchData);
+    if (key === "app") source = source.replace("./utilities.mjs", sharedAssets.utilities).replace("./research.mjs", sharedAssets.research);
     const extension = path.extname(fileName);
     const baseName = path.basename(fileName, extension);
     const hash = createHash("sha256").update(source).digest("hex").slice(0, 10);
@@ -132,7 +135,7 @@ function createPrimaryHeader() {
   return `<header class="site-header">
       <nav class="nav" aria-label="Primary navigation">
         <a class="brand" href="/" aria-label="77 Toolkit home"><span class="brand-mark">77</span><span class="brand-name">77 Toolkit</span></a>
-        <div class="nav-links"><a href="/#tools">All tools</a><a href="/developer/">Developer</a><a href="/text/">Text</a><a href="/image/">Image</a><a href="/web/">Web</a><a href="/guides/">Guides</a></div>
+        <div class="nav-links"><a href="/#tools">All tools</a><a href="/developer/">Developer</a><a href="/text/">Text</a><a href="/image/">Image</a><a href="/web/">Web</a><a href="/research/">Research</a><a href="/guides/">Guides</a></div>
       </nav>
     </header>`;
 }

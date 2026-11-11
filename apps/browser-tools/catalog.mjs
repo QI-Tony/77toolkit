@@ -1,4 +1,11 @@
 export const toolCatalog = [
+  {"slug": "scientific-palette", "name": "Scientific Palette Studio", "category": "Research", "tags": ["Color vision", "Grayscale", "ggplot2"], "description": "Preview scientific palettes in charts, simulate color vision differences, and export group styles for Python or R.", "implementation": "shared"},
+  {"slug": "figure-dpi", "name": "Figure Resolution Checker", "category": "Research", "tags": ["DPI", "Print size", "Raster"], "description": "Calculate effective print DPI and the required pixel width for a journal figure at its placed size.", "implementation": "shared"},
+  {"slug": "figure-panels", "name": "Multi-panel Figure Builder", "category": "Research", "tags": ["Panels", "Labels", "PNG"], "description": "Arrange raster subfigures in a labeled grid and export a locally generated PNG.", "implementation": "shared"},
+  {"slug": "research-csv", "name": "Research CSV Checker", "category": "Research", "tags": ["Missing data", "Duplicate IDs", "Groups"], "description": "Flag duplicate sample IDs, missing values, unequal group counts, and invalid numeric cells in research tables.", "implementation": "shared"},
+  {"slug": "sample-randomizer", "name": "Sample Group Randomizer", "category": "Research", "tags": ["Seed", "Allocation", "CSV"], "description": "Assign sample IDs to fixed-size groups using a seed and export the reproducible assignment as CSV.", "implementation": "shared"},
+  {"slug": "reference-cleaner", "name": "BibTeX and RIS Cleaner", "category": "Research", "tags": ["DOI", "Bibliography", "Duplicates"], "description": "Review duplicate DOIs, conflicting BibTeX keys, and missing publication years before exporting a bibliography.", "implementation": "shared"},
+
   {
     "slug": "number-base",
     "name": "Number Base Converter",
@@ -269,4 +276,4 @@ export const toolCatalog = [
   },
 ];
 
-export const categoryOrder = ["Developer", "Text", "Image", "Web"];
+export const categoryOrder = ["Developer", "Text", "Image", "Web", "Research"];

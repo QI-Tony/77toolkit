@@ -55,9 +55,154 @@ export const categoryContent = {
       "No remote URL fetching or uploaded data",
     ],
   },
+  Research: {
+    slug: "research",
+    title: "Research Tools",
+    description: "Local tools for scientific figures, sample tables, reproducible assignments, and bibliographies.",
+    intro: ["Prepare figures for papers and posters, review a sample manifest, or clean bibliography exports before submission. Every utility works in the current browser tab."],
+    principles: ["Review outputs before publication", "Record inputs and seeds for reproducibility", "Keep unpublished data local"],
+  },
 };
 
 export const toolContent = {
+  "scientific-palette": {
+    "intro": "Give each experimental group a consistent color and marker across a paper. Try the same grouping in a line or scatter preview before editing the plotting script.",
+    "steps": [
+      "Choose categorical, sequential, or diverging colors, or paste an existing set of HEX values.",
+      "Switch between normal, simulated color vision, and grayscale previews. Enable white paper preview and compare overlapping series.",
+      "Name the groups and copy the original color and style mapping for your plotting library."
+    ],
+    "example": {
+      "input": "4 categorical colors, labels Control, Low, Medium, High",
+      "output": "Original HEX values and matching styles for the four labels"
+    },
+    "howItWorks": "The preview converts sRGB into linear light before applying a color vision simulation. Grayscale uses relative luminance. A simple distance heuristic highlights similar pairs in the selected preview.",
+    "limitations": [
+      "The similarity flag is a screening aid and does not certify accessibility.",
+      "Paper, ink, color profiles, line width, and the final chart can change physical print results."
+    ],
+    "faqs": [
+      {
+        "question": "Will the export use the simulated colors?",
+        "answer": "No. The preview helps identify difficult pairs, while the export preserves the original selected colors."
+      }
+    ]
+  },
+  "figure-dpi": {
+    "intro": "Check a raster figure against a target resolution at the size it will occupy in a journal, poster, or thesis. A single file can meet the target at one width and fall short at a larger width.",
+    "steps": [
+      "Select a raster image to read its pixel width, or enter the width manually.",
+      "Enter the placed width in millimeters or inches and the requested target DPI.",
+      "Compare the effective result with the target and record the minimum pixel width for your next export."
+    ],
+    "example": {
+      "input": "1800 px placed at 150 mm; target 300 DPI",
+      "output": "304.80 effective DPI; minimum width 1772 px"
+    },
+    "howItWorks": "Effective DPI divides the pixel width by the physical width in inches. Required pixel width multiplies the target DPI by that physical width, rounding up to a whole pixel.",
+    "limitations": [
+      "The calculator assumes the image keeps its aspect ratio at the chosen width.",
+      "It does not certify typography, color mode, file format, or a journal's full submission checklist."
+    ],
+    "faqs": [
+      {
+        "question": "Does changing the embedded DPI tag add detail?",
+        "answer": "Changing the tag alone leaves the pixel count unchanged. Re-exporting from the source is preferable to enlarging a low-resolution image."
+      }
+    ]
+  },
+  "figure-panels": {
+    "intro": "Combine individual experiment results into one aligned figure with consistent spacing. Add panel labels for references in the manuscript or presentation.",
+    "steps": [
+      "Select the raster files in the order they should appear.",
+      "Set the number of columns, panel width, spacing, and optional label text.",
+      "Compose the grid, inspect it, and download the PNG when the layout matches the figure caption."
+    ],
+    "example": {
+      "input": "Three panels in two columns, labels A, B, C",
+      "output": "A two-row PNG grid with the fourth cell empty"
+    },
+    "howItWorks": "Each source bitmap is fitted into an equally sized cell without cropping. The canvas draws a white background and a label band, then encodes the composed grid as a PNG.",
+    "limitations": [
+      "The output is raster and has a bounded canvas size.",
+      "Plot elements, vector layers, and source metadata are not preserved as editable objects."
+    ],
+    "faqs": [
+      {
+        "question": "Can I choose custom panel labels?",
+        "answer": "Yes. Enter comma-separated labels in the same order as the selected files. Blank labels fall back to A, B, C and so on."
+      }
+    ]
+  },
+  "research-csv": {
+    "intro": "Catch common formatting and data-entry problems before importing a sample sheet into analysis software. The report identifies rows for review and leaves the source table available for comparison.",
+    "steps": [
+      "Paste a CSV table with column headers and select its delimiter.",
+      "Enter the ID and group column names if applicable, and list columns that should contain numbers.",
+      "Review flagged records and group counts, then download the report for follow-up."
+    ],
+    "example": {
+      "input": "id,group,value with a repeated S01 and one NA value",
+      "output": "A duplicate ID flag and a missing value flag"
+    },
+    "howItWorks": "The tool parses quoted delimited fields, compares trimmed identifiers, counts nonmissing group labels, and checks selected columns for finite decimal numbers.",
+    "limitations": [
+      "Record numbers count CSV records, including the header, rather than physical lines inside quoted fields.",
+      "Unequal group counts may be intentional. Review them against your study design before editing values."
+    ],
+    "faqs": [
+      {
+        "question": "Does the checker modify my table?",
+        "answer": "No. It produces a text report. Any corrections should be made with the original collection records available."
+      }
+    ]
+  },
+  "sample-randomizer": {
+    "intro": "Create a reproducible fixed-size allocation for a teaching example, benchmark, or research workflow. Keep the ordered source list, group sizes, seed, and algorithm version with the resulting assignment.",
+    "steps": [
+      "Enter one unique sample ID per line.",
+      "Enter at least two named groups with the desired counts. The counts must add up to the number of samples.",
+      "Enter or generate a seed, randomize the assignments, and download the CSV."
+    ],
+    "example": {
+      "input": "S01 to S04; Control: 2 and Treatment: 2; seed experiment-1",
+      "output": "Four unique IDs assigned to two groups of two"
+    },
+    "howItWorks": "A seed initializes a deterministic pseudorandom number generator. A Fisher–Yates shuffle permutes the input IDs and the tool assigns consecutive slices to the configured groups.",
+    "limitations": [
+      "This version does not balance covariates or perform stratified assignment.",
+      "Input order and group order affect the result. Store both alongside the seed to reproduce it."
+    ],
+    "faqs": [
+      {
+        "question": "Will the same seed always give the same groups?",
+        "answer": "With the same ordered IDs, ordered group specifications, and algorithm version, the assignment is reproducible."
+      }
+    ]
+  },
+  "reference-cleaner": {
+    "intro": "Review a bibliography assembled from multiple exports before adding it to a manuscript. Flag potential duplicate papers, incomplete dates, and citation keys that can cause ambiguous references.",
+    "steps": [
+      "Select BibTeX or RIS and paste the bibliography.",
+      "Review DOI, year, and key findings in the report. Enable duplicate removal only when you want to keep the first entry for each DOI.",
+      "Compare the output with the original and download it in the selected format."
+    ],
+    "example": {
+      "input": "Two BibTeX entries share a DOI, with one DOI expressed as a URL",
+      "output": "A duplicate DOI flag, with optional removal of the later entry"
+    },
+    "howItWorks": "The parser identifies entries and looks for common DOI and date fields. DOI comparison folds letter case and removes common DOI URL prefixes. Optional removal keeps the first matching record.",
+    "limitations": [
+      "The checker supports common BibTeX and RIS syntax and does not resolve macros or consult external DOI registries.",
+      "Duplicate detection uses DOIs; title-only duplicates and different versions of a paper require manual review."
+    ],
+    "faqs": [
+      {
+        "question": "Does it fix conflicting BibTeX citation keys?",
+        "answer": "It flags them for review. Renaming a citation key can require updating manuscript references, so the tool leaves that decision to you."
+      }
+    ]
+  },
   "number-base": {
     "intro": "Convert integer identifiers, bit masks, hexadecimal values, and binary examples without passing through floating-point arithmetic. Select any source and destination bases from 2 through 36. The input stays visible beside an exact, copyable result, including when the value is larger than the safe integer range of a JavaScript Number.",
     "steps": [

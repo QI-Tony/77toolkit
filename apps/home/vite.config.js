@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { toolCatalog } from "../browser-tools/catalog.mjs";
+import { categoryOrder, toolCatalog } from "../browser-tools/catalog.mjs";
 import { featuredWorkflows } from "../browser-tools/discovery.mjs";
 import { applyPageMetadata, escapeHtml, homeMetadata } from "../browser-tools/seo.mjs";
 
@@ -15,6 +15,7 @@ export default defineConfig({
         </a>`).join("");
       return applyPageMetadata(html, homeMetadata)
         .replaceAll("{{TOOL_COUNT}}", String(toolCatalog.length))
+        .replaceAll("{{CATEGORY_COUNT}}", String(categoryOrder.length))
         .replace("<!-- FEATURED_WORKFLOWS -->", workflows);
     },
   }],

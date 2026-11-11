@@ -1,6 +1,7 @@
 import { toolCatalog } from "./catalog.mjs";
 
 export const featuredWorkflows = [
+  { slug: "scientific-palette", label: "Choose scientific figure colors", detail: "Preview chart palettes in grayscale and under simulated color vision.", category: "Research" },
   { slug: "json-fix", label: "Fix broken JSON", detail: "Repair copied API data, format it, and review the result.", category: "Developer" },
   { slug: "image-compressor", label: "Make an image smaller", detail: "Adjust JPEG or WebP quality and compare the file size locally.", category: "Image" },
   { slug: "text-clean", label: "Clean copied AI text", detail: "Remove Markdown-style formatting and keep readable paragraphs.", category: "Text" },
@@ -13,6 +14,36 @@ export const featuredGuideSlugs = ["repair-invalid-json", "image-formats-and-com
 
 // Choose the next task deliberately, including useful links across categories.
 export const relatedToolSlugs = {
+  "scientific-palette": [
+    "contrast-checker",
+    "color-spectrum",
+    "figure-dpi"
+  ],
+  "figure-dpi": [
+    "figure-panels",
+    "image-resizer",
+    "scientific-palette"
+  ],
+  "figure-panels": [
+    "figure-dpi",
+    "image-resizer",
+    "scientific-palette"
+  ],
+  "research-csv": [
+    "csv-json-converter",
+    "sample-randomizer",
+    "text-diff"
+  ],
+  "sample-randomizer": [
+    "research-csv",
+    "csv-json-converter",
+    "line-processor"
+  ],
+  "reference-cleaner": [
+    "research-csv",
+    "text-diff",
+    "line-processor"
+  ],
   "json-fix": ["json-diff", "json-string", "csv-json-converter"],
   "json-diff": ["json-fix", "text-diff", "json-string"],
   "json-string": ["json-fix", "html-entities", "base64"],

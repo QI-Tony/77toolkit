@@ -1,3 +1,4 @@
+import { renderResearch } from "./research.mjs";
 import { convertInteger, convertJsonString, buildCampaignUrl } from "./utilities.mjs";
 
 const root = document.querySelector("#tool-root");
@@ -1631,6 +1632,47 @@ function renderUrlEncoder() {
   });
 }
 
+function parseCsv(text, separator) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+  let touched = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    touched = true;
+    if (quoted) {
+      if (character === '"' && text[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else if (character === '"') {
+        quoted = false;
+      } else {
+        field += character;
+      }
+    } else if (character === '"' && field === "") {
+      quoted = true;
+    } else if (character === separator) {
+      row.push(field);
+      field = "";
+    } else if (character === "\n" || character === "\r") {
+      if (character === "\r" && text[index + 1] === "\n") index += 1;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+    } else {
+      field += character;
+    }
+  }
+  if (quoted) throw new Error("A quoted CSV field is not closed.");
+  if (touched && (field !== "" || row.length || !/[\r\n]$/.test(text))) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows;
+}
+
 function renderCsvJsonConverter() {
   root.innerHTML = `
     <section class="tool-panel">
@@ -1656,46 +1698,6 @@ function renderCsvJsonConverter() {
 
   const delimiter = () => byId("csv-delimiter").value === "tab" ? "\t" : byId("csv-delimiter").value;
 
-  function parseCsv(text, separator) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let quoted = false;
-    let touched = false;
-    for (let index = 0; index < text.length; index += 1) {
-      const character = text[index];
-      touched = true;
-      if (quoted) {
-        if (character === '"' && text[index + 1] === '"') {
-          field += '"';
-          index += 1;
-        } else if (character === '"') {
-          quoted = false;
-        } else {
-          field += character;
-        }
-      } else if (character === '"' && field === "") {
-        quoted = true;
-      } else if (character === separator) {
-        row.push(field);
-        field = "";
-      } else if (character === "\n" || character === "\r") {
-        if (character === "\r" && text[index + 1] === "\n") index += 1;
-        row.push(field);
-        rows.push(row);
-        row = [];
-        field = "";
-      } else {
-        field += character;
-      }
-    }
-    if (quoted) throw new Error("A quoted CSV field is not closed.");
-    if (touched && (field !== "" || row.length || !/[\r\n]$/.test(text))) {
-      row.push(field);
-      rows.push(row);
-    }
-    return rows;
-  }
 
   function csvToJson() {
     try {
@@ -2289,6 +2291,13 @@ function renderUtmBuilder() {
 }
 
 const renderers = {
+  "scientific-palette": () => renderResearch("scientific-palette", { root, setStatus, copyText, downloadBlob, parseCsv }),
+  "figure-dpi": () => renderResearch("figure-dpi", { root, setStatus, copyText, downloadBlob, parseCsv }),
+  "figure-panels": () => renderResearch("figure-panels", { root, setStatus, copyText, downloadBlob, parseCsv }),
+  "research-csv": () => renderResearch("research-csv", { root, setStatus, copyText, downloadBlob, parseCsv }),
+  "sample-randomizer": () => renderResearch("sample-randomizer", { root, setStatus, copyText, downloadBlob, parseCsv }),
+  "reference-cleaner": () => renderResearch("reference-cleaner", { root, setStatus, copyText, downloadBlob, parseCsv }),
+
   "number-base": renderNumberBase,
   "json-string": renderJsonString,
   "utm-builder": renderUtmBuilder,

@@ -70,3 +70,19 @@ private, inexpensive to host, and require little maintenance.
 Tools that need secret API keys, cross-origin fetching, accounts, shared saved
 data, or long-running processing should use `workers/api` instead of calling a
 third-party service directly from the browser.
+
+## Research
+
+- Scientific Palette Studio for chart previews, color vision simulation, grayscale
+  and white paper screening, and Python / R style exports.
+- Figure Resolution Checker for effective DPI at the intended placement width.
+- Multi-panel Figure Builder for labeled PNG grids.
+- Research CSV Checker for missing data, ID conflicts, numeric columns, and group counts.
+- Sample Group Randomizer for seeded fixed-size allocations.
+- BibTeX and RIS Cleaner for duplicate DOI, year, and citation key review.
+
+Research tools use `apps/browser-tools/shared/research.mjs` for browser UI and
+`research-data.mjs` for testable calculations. Palette screens use heuristic
+color distances and cannot predict a physical print. Color vision transforms use
+the severity-1.0 matrices from Machado et al. (2009), DOI
+[10.1109/TVCG.2009.113](https://doi.org/10.1109/TVCG.2009.113).
