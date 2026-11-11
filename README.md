@@ -1,5 +1,8 @@
 # 77 Toolkit
 
+For an AI or developer taking over on another machine, start with the
+[project handoff (中文)](PROJECT_HANDOFF.md).
+
 77 Toolkit is a collection of lightweight, privacy-friendly browser tools. This
 monorepo contains the public homepage, every tool, and shared Cloudflare
 services.
